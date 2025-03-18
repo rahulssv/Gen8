@@ -5,7 +5,7 @@ import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DiagnosticResult } from '@/utils/diagnosticUtils';
-import { ArrowRight, FileText, Target, AlertCircle, Activity, BookOpen, Copy, Download, X } from 'lucide-react';
+import { ArrowRight, FileText, Target, AlertCircle, Activity, BookOpen, Copy, Download, X, Bookmark } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import jsPDF from 'jspdf';
 
@@ -149,7 +149,7 @@ ${result.sources ? `\nSOURCES\n${result.sources.join('\n')}` : ''}
       y += 10;
       doc.setFontSize(12);
       doc.setFont('helvetica', 'bold');
-      doc.text('SOURCES', margin, y);
+      doc.text('RESEARCH PAPERS CITED', margin, y);
       y += 8;
       
       doc.setFont('helvetica', 'normal');
@@ -165,7 +165,7 @@ ${result.sources ? `\nSOURCES\n${result.sources.join('\n')}` : ''}
     y += 10;
     doc.setFontSize(8);
     doc.setTextColor(100, 100, 100);
-    const disclaimer = "This analysis is provided as clinical decision support only. Diagnostic and treatment decisions should be made by qualified healthcare professionals considering all clinical factors.";
+    const disclaimer = "This analysis is provided as clinical decision support only based on AI evaluation of research literature. Diagnostic and treatment decisions should be made by qualified healthcare professionals considering all clinical factors.";
     const disclaimerLines = doc.splitTextToSize(disclaimer, contentWidth);
     doc.text(disclaimerLines, margin, y);
     
@@ -203,7 +203,7 @@ ${result.sources ? `\nSOURCES\n${result.sources.join('\n')}` : ''}
 
         <div className="flex items-center mb-6">
           <Activity size={24} className="mr-2 text-primary" />
-          <h2 className="text-xl font-semibold">Diagnostic Results</h2>
+          <h2 className="text-xl font-semibold">AI Diagnostic Assessment</h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
@@ -213,7 +213,7 @@ ${result.sources ? `\nSOURCES\n${result.sources.join('\n')}` : ''}
           </div>
           
           <div className="space-y-2">
-            <div className="text-sm text-secondary-foreground">Stage</div>
+            <div className="text-sm text-secondary-foreground">Assessment</div>
             <div className="font-medium text-lg">{result.stage}</div>
           </div>
           
@@ -280,24 +280,36 @@ ${result.sources ? `\nSOURCES\n${result.sources.join('\n')}` : ''}
         {result.sources && result.sources.length > 0 && (
           <div className="mb-6">
             <h3 className="text-md font-medium flex items-center mb-4">
-              <BookOpen size={18} className="mr-2 text-primary" />
-              Data Sources
+              <Bookmark size={18} className="mr-2 text-primary" />
+              Research Paper Citations
             </h3>
-            <ul className="space-y-1 text-sm text-secondary-foreground">
-              {result.sources.map((source, index) => (
-                <li key={index} className="flex items-start">
-                  <ArrowRight size={14} className="mr-2 mt-1 text-primary" />
-                  <span>{source}</span>
-                </li>
-              ))}
-            </ul>
+            <div className="bg-gray-50 p-4 rounded-lg border border-gray-100"> 
+              <ul className="space-y-2 text-sm text-secondary-foreground">
+                {result.sources.map((source, index) => (
+                  <li key={index} className="flex items-start py-2 border-b border-gray-100 last:border-0">
+                    <ArrowRight size={14} className="mr-2 mt-1 text-primary" />
+                    <a 
+                      href={source.url} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="underline hover:text-primary"
+                    >
+                      {source.title}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2 italic">
+              These research papers were analyzed by AI to generate this diagnostic assessment.
+            </p>
           </div>
         )}
 
         <div className="mt-8 flex items-center text-xs text-secondary-foreground bg-yellow-50 p-3 rounded-md border border-yellow-100">
           <AlertCircle size={14} className="mr-2 text-yellow-600" />
           <span>
-            This analysis is provided as clinical decision support only. Diagnostic and treatment decisions should be made by qualified healthcare professionals considering all clinical factors.
+            This AI-generated analysis is provided as clinical decision support only, based on published research. Diagnostic and treatment decisions should be made by qualified healthcare professionals considering all clinical factors.
           </span>
         </div>
 

@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import DiagnosticTool from "./pages/DiagnosticTool";
 import BiomarkerReference from "./pages/BiomarkerReference";
+import BiomarkerDetail from "./pages/BiomarkerDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -21,6 +22,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/diagnostic" element={<DiagnosticTool />} />
           <Route path="/reference" element={<BiomarkerReference />} />
+          <Route path="/biomarker/:id" element={<BiomarkerDetail />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

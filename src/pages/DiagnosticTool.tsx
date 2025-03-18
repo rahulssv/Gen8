@@ -1,15 +1,19 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import DiagnosticForm from '@/components/DiagnosticForm';
 import ResultsDisplay from '@/components/ResultsDisplay';
-import { BiomarkerValue, DiagnosticResult, calculateDiagnosticResult } from '@/utils/diagnosticUtils';
-import { FileText, Activity, AlertCircle, RefreshCw } from 'lucide-react';
+import { BiomarkerValue, DiagnosticResult } from '@/utils/diagnosticUtils';
+import { FileText, Activity, AlertCircle, RefreshCw, Key } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { biomarkerDataService } from '@/services/biomarkerDataService';
+import { aiDiagnosticService, GeminiDiagnosticResponse } from '@/services/aiDiagnosticService';
 
 const DiagnosticTool = () => {
   const { toast } = useToast();
@@ -18,9 +22,21 @@ const DiagnosticTool = () => {
   const [diagnosticResult, setDiagnosticResult] = useState<DiagnosticResult | null>(null);
   const [activeTab, setActiveTab] = useState<string>("input");
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [apiKeyDialogOpen, setApiKeyDialogOpen] = useState(false);
+  const [apiKey, setApiKey] = useState('');
+  
+  // Check if API key exists on mount
+  useEffect(() => {
+    const key = aiDiagnosticService.getApiKey();
+    if (!key) {
+      setApiKeyDialogOpen(true);
+    } else {
+      setApiKey(key);
+    }
+  }, []);
   
   // Check last update on component mount
-  React.useEffect(() => {
+  useEffect(() => {
     const checkLastUpdate = async () => {
       const date = await biomarkerDataService.getLastUpdated();
       setLastUpdated(date);
@@ -32,23 +48,28 @@ const DiagnosticTool = () => {
     setIsAnalyzing(true);
     
     try {
-      // Simulate API call with setTimeout
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Check if API key is set
+      if (!aiDiagnosticService.getApiKey()) {
+        setApiKeyDialogOpen(true);
+        setIsAnalyzing(false);
+        return;
+      }
       
-      // Calculate the diagnostic result
-      const result = calculateDiagnosticResult(values);
+      // Call AI service instead of local calculation
+      const result = await aiDiagnosticService.analyzeBiomarkers(values);
+      
       setDiagnosticResult(result);
       setActiveTab("results");
       
       toast({
         title: "Analysis complete",
-        description: "Biomarker analysis has been processed successfully",
+        description: "AI-powered biomarker analysis has been processed successfully",
       });
     } catch (error) {
       console.error("Error in diagnostic analysis:", error);
       toast({
         title: "Analysis failed",
-        description: "There was an error processing the biomarker data",
+        description: error instanceof Error ? error.message : "There was an error processing the biomarker data",
         variant: "destructive",
       });
     } finally {
@@ -84,6 +105,25 @@ const DiagnosticTool = () => {
     }
   };
 
+  const saveApiKey = () => {
+    if (!apiKey.trim()) {
+      toast({
+        title: "Invalid API Key",
+        description: "Please enter a valid Gemini API key",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    aiDiagnosticService.setApiKey(apiKey.trim());
+    setApiKeyDialogOpen(false);
+    
+    toast({
+      title: "API Key Saved",
+      description: "Your Gemini API key has been saved",
+    });
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -94,10 +134,10 @@ const DiagnosticTool = () => {
             <div className="mb-8 text-center">
               <h1 className="text-3xl font-bold mb-4">Breast Cancer Diagnostic Tool</h1>
               <p className="text-secondary-foreground max-w-2xl mx-auto">
-                Input biomarker values from blood tests and liquid biopsy results to generate a comprehensive diagnostic assessment.
+                Input biomarker values from blood tests and liquid biopsy results to generate AI-powered diagnostic assessment based on research papers.
               </p>
               
-              <div className="mt-4 flex items-center justify-center gap-2 text-sm text-secondary-foreground">
+              <div className="mt-4 flex flex-wrap items-center justify-center gap-2 text-sm text-secondary-foreground">
                 <span>
                   Data source: Research papers and clinical guidelines
                 </span>
@@ -115,6 +155,16 @@ const DiagnosticTool = () => {
                 >
                   <RefreshCw size={14} className={isRefreshing ? "animate-spin" : ""} />
                   <span>Refresh Data</span>
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-1 ml-2"
+                  onClick={() => setApiKeyDialogOpen(true)}
+                >
+                  <Key size={14} />
+                  <span>Configure API Key</span>
                 </Button>
               </div>
             </div>
@@ -172,6 +222,49 @@ const DiagnosticTool = () => {
           </div>
         </div>
       </main>
+      
+      <Dialog open={apiKeyDialogOpen} onOpenChange={setApiKeyDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Enter Gemini API Key</DialogTitle>
+            <DialogDescription>
+              This diagnostic tool uses Google's Gemini AI to analyze biomarker data against research papers.
+              Please enter your Gemini API key to enable AI-powered diagnostics.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="api-key" className="text-right">
+                API Key
+              </Label>
+              <Input
+                id="api-key"
+                type="password"
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+                placeholder="Enter your Gemini API key"
+                className="col-span-3"
+              />
+            </div>
+            <div className="col-span-4 text-xs text-muted-foreground">
+              Your API key is stored locally in your browser and never sent to our servers.
+              <a 
+                href="https://ai.google.dev/tutorials/setup" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-primary underline ml-1"
+              >
+                Get a Gemini API key
+              </a>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button type="submit" onClick={saveApiKey}>Save API Key</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       
       <Footer />
     </div>
