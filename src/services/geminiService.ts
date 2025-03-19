@@ -31,8 +31,7 @@ export const fetchGeminiResults = async (
             {
               parts: [
                 {
-                  text: `
-                  You are a specialized medical research assistant with access to PubMed. Your task is to provide a detailed, evidence-based response to the following biomedical query:
+                  text: `You are a specialized medical research assistant with access to PubMed. Your task is to provide a detailed, evidence-based response to the following biomedical query:
 
                   Query: ${query}
 
@@ -64,24 +63,7 @@ export const fetchGeminiResults = async (
                   - If the query involves a specific disease, treatment, or biomarker, tailor the search to prioritize articles that directly address that context.
                   - For statistical data, include the most clinically significant metrics and ensure they are presented with appropriate context (e.g., study population, treatment arms).
                   - Keep the entire response concise, ideally within 3-5 paragraphs, while ensuring all key points are covered.
-                  - If there are conflicting findings or recent updates, highlight these to provide a balanced view (e.g., "A 2023 study [PMID: 12345678] suggests a new treatment approach, contradicting earlier data [PMID: 87654321]").
-
-                  **Output Example**:
-                  Based on recent PubMed articles, the best treatment for BRAF V600E mutation in colorectal cancer is the combination of encorafenib and cetuximab, which has shown a median overall survival of 15.3 months [PMID: 34567890]. This is supported by the BEACON CRC trial, a phase 3 study [PMID: 31234567]. Coexisting KRAS mutations may reduce efficacy, though data is limited [PMID: 33456789].
-
-                  **KEY FINDINGS**:
-                  - **Biomarkers and Mutations**: BRAF V600E is a key driver mutation in colorectal cancer.
-                  - **Drugs and Treatments**: Encorafenib + cetuximab: median OS of 15.3 months (95% CI: 11.5–19.1) [PMID: 34567890].
-                  - **Clinical Trials**: BEACON CRC trial (phase 3): improved survival compared to standard therapy [PMID: 31234567].
-                  - **Disease Associations**: BRAF V600E is associated with poorer prognosis in metastatic colorectal cancer.
-                  - **Coexisting Biomarkers/Mutations**: Limited data; KRAS co-mutations may affect treatment response [PMID: 33456789].
-                  - **Statistical Data**: 5-year survival rate for BRAF V600E patients: 10% without targeted therapy [PMID: 29876543].
-
-                  **REFERENCES**:
-                  [1] Kopetz S et al. (2019). "Encorafenib, Binimetinib, and Cetuximab in BRAF V600E–Mutated Colorectal Cancer." *N Engl J Med*. PMID: 31566309.
-                  [2] Van Cutsem E et al. (2023). "Updated results from the BEACON CRC trial." *Lancet Oncol*. PMID: 36754321.
-                  [3] Smith J et al. (2021). "Impact of coexisting mutations in colorectal cancer." *J Clin Oncol*. PMID: 33456789.
-                  `,
+                  - If there are conflicting findings or recent updates, highlight these to provide a balanced view (e.g., "A 2023 study [PMID: 12345678] suggests a new treatment approach, contradicting earlier data [PMID: 87654321]").`,
                 },
               ],
             },

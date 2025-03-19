@@ -1,16 +1,56 @@
 
-import { useState } from 'react';
-import { Search } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, KeyRound, Save } from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import ApiKeyInput from '@/components/ApiKeyInput';
 
-const SearchForm = ({ onSearch }: { onSearch: (query: string) => void }) => {
+interface SearchFormProps {
+  onSearch: (query: string, apiKey: string) => void;
+}
+
+const LOCAL_STORAGE_KEY = "bioquery_gemini_api_key";
+
+const SearchForm = ({ onSearch }: SearchFormProps) => {
   const [query, setQuery] = useState('');
   const [isFocused, setIsFocused] = useState(false);
+  const [apiKey, setApiKey] = useState("");
+  const { toast } = useToast();
+  
+  useEffect(() => {
+    // Load API key from localStorage if available
+    const savedApiKey = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (savedApiKey) {
+      setApiKey(savedApiKey);
+    }
+  }, []);
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (query.trim()) {
-      onSearch(query);
+      if (!apiKey.trim()) {
+        toast({
+          title: "API Key Required",
+          description: "Please set your Gemini API key to search.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Pass query and API key to parent component to perform search
+      onSearch(query, apiKey);
+    } else {
+      toast({
+        title: "Search Required",
+        description: "Please enter a search query.",
+        variant: "destructive",
+      });
     }
+  };
+  
+  const handleApiKeyChange = (newApiKey: string) => {
+    setApiKey(newApiKey);
   };
 
   return (
@@ -22,6 +62,12 @@ const SearchForm = ({ onSearch }: { onSearch: (query: string) => void }) => {
         </p>
       </div>
       
+      {/* API Key Input */}
+      <div className="w-full mb-6">
+        <ApiKeyInput onApiKeyChange={handleApiKeyChange} />
+      </div>
+      
+      {/* Search Form */}
       <form 
         onSubmit={handleSubmit}
         className="w-full"

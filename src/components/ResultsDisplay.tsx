@@ -2,27 +2,21 @@
 import { useState } from 'react';
 import { Article } from './ArticleCard';
 import SummaryGenerator from './SummaryGenerator';
-import ApiKeyInput from './ApiKeyInput';
 import GeminiResultsDisplay from './GeminiResultsDisplay';
 import ReferencesDisplay from './ReferencesDisplay';
-import GeminiInsightButton from './GeminiInsightButton';
-import { fetchGeminiResults } from '@/services/geminiService';
 import { parseReferencesFromGeminiResponse } from '@/utils/formatUtils';
 import { Search } from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
 
 interface ResultsDisplayProps {
   query: string;
   onBack: () => void;
+  geminiResponse: string | null;
+  isLoading: boolean;
 }
 
-const ResultsDisplay = ({ query, onBack }: ResultsDisplayProps) => {
+const ResultsDisplay = ({ query, onBack, geminiResponse, isLoading }: ResultsDisplayProps) => {
   const [selectedArticles, setSelectedArticles] = useState<Article[]>([]);
-  const [geminiLoading, setGeminiLoading] = useState(false);
-  const [geminiResponse, setGeminiResponse] = useState<string | null>(null);
-  const [apiKey, setApiKey] = useState<string>("");
   const [showSummary, setShowSummary] = useState(false);
-  const { toast } = useToast();
   
   const handleSelectArticle = (id: string, selected: boolean) => {
     if (selected) {
@@ -41,29 +35,6 @@ const ResultsDisplay = ({ query, onBack }: ResultsDisplayProps) => {
   
   const handleBackToResults = () => {
     setShowSummary(false);
-  };
-
-  const fetchGeminiCuration = async () => {
-    setGeminiLoading(true);
-    setGeminiResponse(null);
-
-    try {
-      const response = await fetchGeminiResults(query, apiKey);
-      setGeminiResponse(response);
-    } catch (error) {
-      console.error("Error fetching from Gemini:", error);
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to get results from Gemini API",
-        variant: "destructive",
-      });
-    } finally {
-      setGeminiLoading(false);
-    }
-  };
-
-  const handleApiKeyChange = (key: string) => {
-    setApiKey(key);
   };
 
   // Parse the Gemini response to extract references
@@ -98,25 +69,19 @@ const ResultsDisplay = ({ query, onBack }: ResultsDisplayProps) => {
         </h2>
       </div>
       
-      <ApiKeyInput onApiKeyChange={handleApiKeyChange} />
-      
-      {apiKey && !geminiResponse && !geminiLoading && (
-        <GeminiInsightButton 
-          onGetInsights={fetchGeminiCuration} 
-          apiKey={apiKey} 
-        />
-      )}
-      
       <GeminiResultsDisplay 
         geminiResponse={geminiResponse} 
-        isLoading={geminiLoading} 
+        isLoading={isLoading}
+        query={query}
       />
       
-      <ReferencesDisplay 
-        references={extractedReferences}
-        onSelectArticle={handleSelectArticle}
-        onGenerateSummary={handleGenerateSummary}
-      />
+      {!isLoading && geminiResponse && (
+        <ReferencesDisplay 
+          references={extractedReferences}
+          onSelectArticle={handleSelectArticle}
+          onGenerateSummary={handleGenerateSummary}
+        />
+      )}
     </div>
   );
 };

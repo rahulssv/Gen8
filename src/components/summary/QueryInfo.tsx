@@ -1,4 +1,6 @@
 
+import { Button } from '@/components/ui/button';
+
 interface QueryInfoProps {
   query: string;
   hasGeminiResponse: boolean;
