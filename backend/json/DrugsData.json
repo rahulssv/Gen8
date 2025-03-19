@@ -1,0 +1,29 @@
+{
+    "braf_related_treatments": [
+      {
+        "name": "Encorafenib (Braftovi)",
+        "type": "BRAF inhibitor",
+        "mechanism": "Selectively inhibits BRAF V600E kinase activity",
+        "efficacy": "Median OS of 9.3 months as monotherapy",
+        "approvalStatus": "FDA Approved",
+        "url": "https://www.braftovi.com/"
+      },
+      {
+        "name": "Cetuximab (Erbitux)",
+        "type": "EGFR inhibitor (monoclonal antibody)",
+        "mechanism": "Binds to EGFR and blocks ligand binding",
+        "efficacy": "Objective response rate of 26.8% when combined with encorafenib",
+        "approvalStatus": "FDA Approved",
+        "url": "https://www.erbitux.com/"
+      },
+      {
+        "name": "Binimetinib (Mektovi)",
+        "type": "MEK inhibitor",
+        "mechanism": "Inhibits MEK1 and MEK2 activation and kinase activity",
+        "efficacy": "Marginal additional benefit when added to encorafenib and cetuximab",
+        "approvalStatus": "FDA Approved",
+        "url": "https://www.mektovi.com/"
+      }
+    ]
+  }
+  

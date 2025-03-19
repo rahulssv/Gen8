@@ -1,0 +1,24 @@
+{
+    "braf_v600e_associations": [
+      {
+        "disease": "Colorectal Cancer",
+        "relationship": "BRAF V600E mutation is present in 8-12% of cases",
+        "strength": "Strong",
+        "evidence": "Multiple large cohort studies with consistent findings",
+        "notes": "Associated with microsatellite instability and right-sided tumor location"
+      },
+      {
+        "disease": "Melanoma",
+        "relationship": "BRAF V600E mutation is present in approximately 50% of cases",
+        "strength": "Strong",
+        "evidence": "Established biomarker with FDA-approved targeted therapies"
+      },
+      {
+        "disease": "Thyroid Cancer",
+        "relationship": "BRAF V600E mutation occurs in 40-45% of papillary thyroid carcinomas",
+        "strength": "Strong",
+        "evidence": "Multiple clinical studies with consistent findings"
+      }
+    ]
+  }
+  

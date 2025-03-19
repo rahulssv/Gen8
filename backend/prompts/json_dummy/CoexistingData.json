@@ -1,0 +1,26 @@
+{
+    "genomic_alterations": [
+      {
+        "name": "KRAS mutation",
+        "type": "Oncogene mutation",
+        "effect": "Antagonistic",
+        "clinical_implication": "Reduces efficacy of BRAF inhibitors; typically mutually exclusive with BRAF V600E",
+        "frequency_of_cooccurrence": "Rare (<1%)"
+      },
+      {
+        "name": "PIK3CA mutation",
+        "type": "Oncogene mutation",
+        "effect": "Synergistic",
+        "clinical_implication": "May contribute to resistance to BRAF inhibitors; combination therapy targeting both pathways may be beneficial",
+        "frequency_of_cooccurrence": "10-15% of BRAF-mutant CRC"
+      },
+      {
+        "name": "Microsatellite Instability (MSI-H)",
+        "type": "Molecular phenotype",
+        "effect": "Variable",
+        "clinical_implication": "MSI-H tumors with BRAF V600E may respond better to immunotherapy than MSS BRAF-mutant tumors",
+        "frequency_of_cooccurrence": "~30% of BRAF-mutant CRC"
+      }
+    ]
+  }
+  

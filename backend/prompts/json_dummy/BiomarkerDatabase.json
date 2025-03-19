@@ -1,0 +1,165 @@
+{
+    "braf": {
+      "name": "BRAF",
+      "aliases": [
+        "B-Raf proto-oncogene",
+        "v-Raf murine sarcoma viral oncogene homolog B"
+      ],
+      "type": "Gene/Protein",
+      "description": "BRAF is a gene that encodes a protein called B-Raf, which is involved in sending signals inside cells that direct cell growth. Mutations in this gene can cause cells to grow and divide abnormally, potentially leading to cancer.",
+      "clinicalSignificance": [
+        "Critical driver mutation in several cancer types",
+        "Targetable by BRAF inhibitor drugs like vemurafenib, dabrafenib, and encorafenib",
+        "Most common mutation is V600E, representing ~90% of all BRAF mutations"
+      ],
+      "associatedDiseases": [
+        "Melanoma",
+        "Colorectal cancer",
+        "Thyroid cancer",
+        "Hairy cell leukemia",
+        "Langerhans cell histiocytosis"
+      ],
+      "testMethods": [
+        "PCR-based methods",
+        "Next-generation sequencing (NGS)",
+        "Immunohistochemistry for BRAF V600E"
+      ],
+      "references": [
+        "Davies H, et al. Mutations of the BRAF gene in human cancer. Nature. 2002;417:949-954.",
+        "Flaherty KT, et al. Inhibition of mutated, activated BRAF in metastatic melanoma. N Engl J Med. 2010;363:809-819."
+      ]
+    },
+    "egfr": {
+      "name": "EGFR",
+      "aliases": [
+        "Epidermal Growth Factor Receptor",
+        "HER1",
+        "ErbB1"
+      ],
+      "type": "Gene/Protein",
+      "description": "EGFR is a transmembrane receptor that binds to epidermal growth factor, leading to cellular proliferation, differentiation, and survival. Mutations or overexpression can lead to uncontrolled cell division.",
+      "clinicalSignificance": [
+        "Key driver in non-small cell lung cancer",
+        "Targetable by tyrosine kinase inhibitors like erlotinib, gefitinib, and osimertinib",
+        "Common mutations include exon 19 deletions and L858R point mutation"
+      ],
+      "associatedDiseases": [
+        "Non-small cell lung cancer",
+        "Colorectal cancer",
+        "Glioblastoma",
+        "Head and neck squamous cell carcinoma"
+      ],
+      "testMethods": [
+        "PCR-based methods",
+        "Next-generation sequencing (NGS)",
+        "FISH for gene amplification",
+        "Immunohistochemistry for protein expression"
+      ],
+      "references": [
+        "Lynch TJ, et al. Activating mutations in the epidermal growth factor receptor underlying responsiveness of non-small-cell lung cancer to gefitinib. N Engl J Med. 2004;350:2129-2139.",
+        "Paez JG, et al. EGFR mutations in lung cancer: correlation with clinical response to gefitinib therapy. Science. 2004;304:1497-1500."
+      ]
+    },
+    "psa": {
+      "name": "PSA",
+      "aliases": [
+        "Prostate-Specific Antigen",
+        "Kallikrein-3",
+        "KLK3"
+      ],
+      "type": "Protein/Blood Biomarker",
+      "description": "PSA is a protein produced by the prostate gland. Blood levels of PSA can be elevated in men with prostate cancer, but also in non-cancerous conditions like prostatitis and benign prostatic hyperplasia.",
+      "clinicalSignificance": [
+        "Screening tool for prostate cancer",
+        "Monitoring treatment response and recurrence",
+        "Higher levels correlate with increased risk of prostate cancer"
+      ],
+      "normalRange": {
+        "value": "<4.0",
+        "unit": "ng/mL"
+      },
+      "associatedDiseases": [
+        "Prostate cancer",
+        "Benign prostatic hyperplasia",
+        "Prostatitis"
+      ],
+      "testMethods": [
+        "Blood test (ELISA)",
+        "Free PSA test",
+        "PSA velocity (rate of change over time)"
+      ],
+      "references": [
+        "Catalona WJ, et al. Measurement of prostate-specific antigen in serum as a screening test for prostate cancer. N Engl J Med. 1991;324:1156-1161.",
+        "Thompson IM, et al. Prevalence of prostate cancer among men with a prostate-specific antigen level ≤4.0 ng per milliliter. N Engl J Med. 2004;350:2239-2246."
+      ]
+    },
+    "tnf-alpha": {
+      "name": "TNF-α",
+      "aliases": [
+        "Tumor Necrosis Factor alpha",
+        "TNF",
+        "Cachectin"
+      ],
+      "type": "Cytokine/Protein",
+      "description": "TNF-α is a cytokine involved in systemic inflammation and acute phase reaction. It is produced primarily by activated macrophages, although it can be produced by other cell types.",
+      "clinicalSignificance": [
+        "Key mediator of inflammatory response",
+        "Target for biologic therapies in autoimmune diseases",
+        "Elevated in various inflammatory conditions"
+      ],
+      "normalRange": {
+        "value": "<8.1",
+        "unit": "pg/mL"
+      },
+      "associatedDiseases": [
+        "Rheumatoid arthritis",
+        "Inflammatory bowel disease",
+        "Psoriasis",
+        "Ankylosing spondylitis",
+        "Sepsis"
+      ],
+      "testMethods": [
+        "ELISA",
+        "Radioimmunoassay",
+        "Flow cytometry"
+      ],
+      "references": [
+        "Feldmann M, et al. TNF alpha as a therapeutic target in rheumatoid arthritis. Circ Res. 2002;90:123-132.",
+        "Brennan FM, et al. Inhibitory effect of TNF alpha antibodies on synovial cell interleukin-1 production in rheumatoid arthritis. Lancet. 1989;2:244-247."
+      ]
+    },
+    "hba1c": {
+      "name": "HbA1c",
+      "aliases": [
+        "Glycated hemoglobin",
+        "Hemoglobin A1c",
+        "A1C"
+      ],
+      "type": "Blood Biomarker",
+      "description": "HbA1c is formed when hemoglobin joins with glucose in the blood, becoming 'glycated'. By measuring HbA1c, clinicians can get an overall picture of average blood sugar levels over a period of weeks/months.",
+      "clinicalSignificance": [
+        "Diagnosis of diabetes mellitus",
+        "Monitoring long-term glycemic control",
+        "Predictor of diabetes complications"
+      ],
+      "normalRange": {
+        "value": "4.0-5.7",
+        "unit": "%"
+      },
+      "associatedDiseases": [
+        "Diabetes mellitus",
+        "Prediabetes",
+        "Metabolic syndrome"
+      ],
+      "testMethods": [
+        "High-performance liquid chromatography (HPLC)",
+        "Immunoassay",
+        "Capillary electrophoresis"
+      ],
+      "references": [
+        "American Diabetes Association. Diagnosis and classification of diabetes mellitus. Diabetes Care. 2010;33:S62-S69.",
+        "Nathan DM, et al. The effect of intensive treatment of diabetes on the development and progression of long-term complications in insulin-dependent diabetes mellitus. N Engl J Med. 1993;329:977-986."
+      ]
+    }
+  }
+  
