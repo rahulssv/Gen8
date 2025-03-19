@@ -1,0 +1,26 @@
+[
+    {
+        "subject": "BRAF V600E",
+        "predicate": "is treated by",
+        "object": "encorafenib + cetuximab",
+        "confidence": 0.92
+    },
+    {
+        "subject": "encorafenib + cetuximab",
+        "predicate": "improves",
+        "object": "overall survival",
+        "confidence": 0.88
+    },
+    {
+        "subject": "KRAS mutation",
+        "predicate": "reduces efficacy of",
+        "object": "BRAF inhibitors",
+        "confidence": 0.84
+    },
+    {
+        "subject": "binimetinib",
+        "predicate": "inhibits",
+        "object": "MEK",
+        "confidence": 0.95
+    }
+]

@@ -1,0 +1,67 @@
+[
+    {
+      "name": "BRAF V600E",
+      "type": "mutation",
+      "mentions": 42,
+      "relations": [
+            {
+          "subject": "BRAF V600E",
+          "predicate": "is treated by",
+          "object": "encorafenib + cetuximab",
+          "confidence": 0.92
+            }
+        ]
+    },
+    {
+      "name": "encorafenib",
+      "type": "drug",
+      "mentions": 38,
+      "relations": [
+            {
+          "subject": "encorafenib",
+          "predicate": "combined with",
+          "object": "cetuximab",
+          "confidence": 0.95
+            }
+        ]
+    },
+    {
+      "name": "cetuximab",
+      "type": "drug",
+      "mentions": 36,
+      "relations": [
+            {
+          "subject": "cetuximab",
+          "predicate": "targets",
+          "object": "EGFR",
+          "confidence": 0.89
+            }
+        ]
+    },
+    {
+      "name": "colorectal cancer",
+      "type": "disease",
+      "mentions": 53,
+      "relations": [
+            {
+          "subject": "colorectal cancer",
+          "predicate": "has mutation",
+          "object": "BRAF V600E",
+          "confidence": 0.97
+            }
+        ]
+    },
+    {
+      "name": "BEACON CRC",
+      "type": "clinical trial",
+      "mentions": 22,
+      "relations": [
+            {
+          "subject": "BEACON CRC",
+          "predicate": "evaluated",
+          "object": "encorafenib + cetuximab",
+          "confidence": 0.94
+            }
+        ]
+    }
+]

@@ -1,8 +1,11 @@
 
 import { Article, QueryResult, ExtractionResult } from './types';
-import QA from '../../../backend/json/QA.json'
+import qa from '../../../backend/json/QA.json'
 import statistics from '../../../backend/json/Statistics.json'
-statistics
+import articles from '../../../backend/json/Articles.json'
+import entities from '../../../backend/json/Entities.json'
+import relations from '../../../backend/json/Relations.json'
+
 // Mock API key storage - in a real app, this would be handled more securely
 let storedApiKey: string | null = null;
 
@@ -63,162 +66,15 @@ const generateMockArticles = (query: string): Article[] => {
   const isCancer = query.toLowerCase().includes('cancer');
   const isBraf = query.toLowerCase().includes('braf');
   
-  return [
-    {
-      id: "1",
-      title: isBraf ? "Encorafenib, Binimetinib, and Cetuximab in BRAF V600E–Mutated Colorectal Cancer" : "Novel treatment approaches in metastatic cancer",
-      authors: ["Kopetz S", "Grothey A", "Yaeger R"],
-      journal: "New England Journal of Medicine",
-      year: 2023,
-      url: "https://pubmed.ncbi.nlm.nih.gov/article1",
-      abstract: "The BRAF V600E mutation occurs in 8 to 12% of patients with metastatic colorectal cancer and is associated with poor prognosis...",
-      source: "PubMed",
-      relevanceScore: 0.92
-    },
-    {
-      id: "2",
-      title: isBraf ? "Efficacy of Combined BRAF and MEK Inhibition in BRAF V600E-Mutant Colorectal Cancer" : "Targeted therapy advancements in solid tumors",
-      authors: ["Van Cutsem E", "Huijberts S", "Grothey A"],
-      journal: "Journal of Clinical Oncology",
-      year: 2022,
-      url: "https://pubmed.ncbi.nlm.nih.gov/article2",
-      abstract: "BRAF V600E-mutated metastatic colorectal cancer has a poor prognosis with limited treatment options...",
-      source: "Taylor & Francis",
-      relevanceScore: 0.89
-    },
-    {
-      id: "3",
-      title: "Molecular Profiling and Targeted Therapy in BRAF-Mutant Colorectal Cancer",
-      authors: ["Parseghian CM", "Napolitano S", "Loree JM"],
-      journal: "Clinical Cancer Research",
-      year: 2022,
-      url: "https://pubmed.ncbi.nlm.nih.gov/article3",
-      abstract: "Colorectal cancer (CRC) with BRAF V600E mutation represents a distinct molecular subtype with poor prognosis...",
-      source: "Science Direct",
-      relevanceScore: 0.87
-    },
-    {
-      id: "4",
-      title: "BEACON CRC Study: A Phase 3 Trial of Encorafenib and Cetuximab With or Without Binimetinib",
-      authors: ["Kopetz S", "Grothey A", "Van Cutsem E"],
-      journal: "Lancet Oncology",
-      year: 2021,
-      url: "https://pubmed.ncbi.nlm.nih.gov/article4",
-      abstract: "The triplet combination of encorafenib, binimetinib, and cetuximab showed promising efficacy in patients with BRAF V600E-mutated metastatic colorectal cancer...",
-      source: "PubMed",
-      relevanceScore: 0.85
-    },
-    {
-      id: "5",
-      title: "Clinical Outcome of Patients with BRAF V600E Mutation in Colorectal Cancer",
-      authors: ["Loupakis F", "Cremolini C", "Masi G"],
-      journal: "British Journal of Cancer",
-      year: 2022,
-      url: "https://pubmed.ncbi.nlm.nih.gov/article5",
-      abstract: "BRAF V600E mutation is associated with distinctive clinicopathological features and poor prognosis in metastatic colorectal cancer...",
-      source: "Science Direct",
-      relevanceScore: 0.82
-    }
-  ];
+  return articles ;
 };
 
 const generateMockEntities = (query: string): any[] => {
-  return [
-    {
-      name: "BRAF V600E",
-      type: "mutation",
-      mentions: 42,
-      relations: [
-        {
-          subject: "BRAF V600E",
-          predicate: "is treated by",
-          object: "encorafenib + cetuximab",
-          confidence: 0.92
-        }
-      ]
-    },
-    {
-      name: "encorafenib",
-      type: "drug",
-      mentions: 38,
-      relations: [
-        {
-          subject: "encorafenib",
-          predicate: "combined with",
-          object: "cetuximab",
-          confidence: 0.95
-        }
-      ]
-    },
-    {
-      name: "cetuximab",
-      type: "drug",
-      mentions: 36,
-      relations: [
-        {
-          subject: "cetuximab",
-          predicate: "targets",
-          object: "EGFR",
-          confidence: 0.89
-        }
-      ]
-    },
-    {
-      name: "colorectal cancer",
-      type: "disease",
-      mentions: 53,
-      relations: [
-        {
-          subject: "colorectal cancer",
-          predicate: "has mutation",
-          object: "BRAF V600E",
-          confidence: 0.97
-        }
-      ]
-    },
-    {
-      name: "BEACON CRC",
-      type: "clinical trial",
-      mentions: 22,
-      relations: [
-        {
-          subject: "BEACON CRC",
-          predicate: "evaluated",
-          object: "encorafenib + cetuximab",
-          confidence: 0.94
-        }
-      ]
-    }
-  ];
+  return entities;
 };
 
 const generateMockRelations = (): any[] => {
-  return [
-    {
-      subject: "BRAF V600E",
-      predicate: "is treated by",
-      object: "encorafenib + cetuximab",
-      confidence: 0.92
-    },
-    {
-      subject: "encorafenib + cetuximab",
-      predicate: "improves",
-      object: "overall survival",
-      confidence: 0.88
-    },
-    {
-      subject: "KRAS mutation",
-      predicate: "reduces efficacy of",
-      object: "BRAF inhibitors",
-      confidence: 0.84
-    },
-    {
-      subject: "binimetinib",
-      predicate: "inhibits",
-      object: "MEK",
-      confidence: 0.95
-    }
-  ];
+  return relations;
 };
 
 const generateMockStatistics = (): any[] => {
@@ -234,5 +90,5 @@ const generateMockSummary = (query: string): string => {
 };
 
 const generateMockQuestions = (query: string): any[] => {
-  return QA;
+  return qa;
 };
