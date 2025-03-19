@@ -1,5 +1,4 @@
-
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Slider } from "@/components/ui/slider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -7,85 +6,24 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { TestTube, Microscope, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import biomarkersData from '../../../backend/json/Biomarkers.json'
 
 interface Biomarker {
   id: string;
   name: string;
   value: number;
   unit: string;
-  normalRange: [number, number];
+  normal_range: {
+    min: number;
+    max: number;
+  };
   description: string;
 }
 
 const DiagnosticTool = () => {
   const { toast } = useToast();
   const [diagnosisResult, setDiagnosisResult] = useState<string | null>(null);
-  const [biomarkers, setBiomarkers] = useState<Biomarker[]>([
-    {
-      id: "glucose",
-      name: "Blood Glucose",
-      value: 100,
-      unit: "mg/dL",
-      normalRange: [70, 100],
-      description: "Measures the amount of glucose (sugar) in your blood."
-    },
-    {
-      id: "cholesterol",
-      name: "Total Cholesterol",
-      value: 200,
-      unit: "mg/dL",
-      normalRange: [125, 200],
-      description: "Measures all cholesterol in your blood."
-    },
-    {
-      id: "hdl",
-      name: "HDL Cholesterol",
-      value: 55,
-      unit: "mg/dL",
-      normalRange: [40, 60],
-      description: "High-density lipoprotein, often called 'good' cholesterol."
-    },
-    {
-      id: "ldl",
-      name: "LDL Cholesterol",
-      value: 100,
-      unit: "mg/dL",
-      normalRange: [0, 100],
-      description: "Low-density lipoprotein, often called 'bad' cholesterol."
-    },
-    {
-      id: "triglycerides",
-      name: "Triglycerides",
-      value: 150,
-      unit: "mg/dL",
-      normalRange: [0, 150],
-      description: "A type of fat in your blood that can increase risk of heart disease."
-    },
-    {
-      id: "a1c",
-      name: "HbA1c",
-      value: 5.7,
-      unit: "%",
-      normalRange: [4.0, 5.7],
-      description: "Measures your average blood glucose level over the past 2-3 months."
-    },
-    {
-      id: "crp",
-      name: "C-Reactive Protein",
-      value: 2,
-      unit: "mg/L",
-      normalRange: [0, 3],
-      description: "A marker of inflammation in the body."
-    },
-    {
-      id: "tsh",
-      name: "TSH",
-      value: 2.5,
-      unit: "mIU/L",
-      normalRange: [0.4, 4.0],
-      description: "Thyroid-stimulating hormone, which regulates thyroid function."
-    }
-  ]);
+  const [biomarkers, setBiomarkers] = useState<Biomarker[]>(biomarkersData || []);
 
   const handleBiomarkerChange = (id: string, newValue: number[]) => {
     setBiomarkers(prev => prev.map(marker => 
@@ -94,20 +32,15 @@ const DiagnosticTool = () => {
   };
 
   const analyzeBiomarkers = () => {
-    // This is a simplified mock diagnosis algorithm
-    // In a real app, this would be more sophisticated or use an API
-    
     const abnormalMarkers = biomarkers.filter(
-      marker => marker.value < marker.normalRange[0] || marker.value > marker.normalRange[1]
+      marker => marker.value < marker.normal_range.min || marker.value > marker.normal_range.max
     );
 
     let diagnosis = "";
     
-    // Simple rule-based diagnosis
     if (abnormalMarkers.length === 0) {
       diagnosis = "All biomarkers are within normal ranges. No concerning patterns detected.";
     } else {
-      // Check for specific patterns
       const glucose = biomarkers.find(m => m.id === "glucose")!;
       const a1c = biomarkers.find(m => m.id === "a1c")!;
       const ldl = biomarkers.find(m => m.id === "ldl")!;
@@ -125,7 +58,6 @@ const DiagnosticTool = () => {
       } else if (crp.value > 10) {
         diagnosis = "Significant inflammation detected. Elevated C-reactive protein may indicate infection, tissue injury, or chronic inflammatory conditions.";
       } else {
-        // List the abnormal biomarkers
         diagnosis = `The following biomarkers are outside normal ranges: ${abnormalMarkers.map(m => m.name).join(", ")}. Consider consulting with a healthcare provider.`;
       }
     }
@@ -150,7 +82,6 @@ const DiagnosticTool = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Biomarker Input Panel */}
           <div className="lg:col-span-2">
             <Card className="shadow-sm border border-gray-200 dark:border-gray-800">
               <CardHeader className="bg-gradient-to-r from-white to-gray-50 dark:from-gray-900 dark:to-gray-900/50 border-b border-gray-100 dark:border-gray-800 pb-3">
@@ -171,7 +102,7 @@ const DiagnosticTool = () => {
                         </Label>
                         <div className="flex items-center space-x-2">
                           <Badge 
-                            variant={marker.value < marker.normalRange[0] || marker.value > marker.normalRange[1] 
+                            variant={marker.value < marker.normal_range.min || marker.value > marker.normal_range.max 
                               ? "destructive" 
                               : "outline"}
                             className="px-2 py-0.5"
@@ -179,14 +110,14 @@ const DiagnosticTool = () => {
                             {marker.value} {marker.unit}
                           </Badge>
                           <Badge variant="outline" className="px-2 py-0.5 text-xs">
-                            Normal: {marker.normalRange[0]}-{marker.normalRange[1]} {marker.unit}
+                            Normal: {marker.normal_range.min}-{marker.normal_range.max} {marker.unit}
                           </Badge>
                         </div>
                       </div>
                       <Slider 
                         id={marker.id}
-                        min={marker.normalRange[0] * 0.5}
-                        max={marker.normalRange[1] * 2}
+                        min={marker.normal_range.min * 0.5}
+                        max={marker.normal_range.max * 2}
                         step={marker.id === 'a1c' ? 0.1 : 1}
                         value={[marker.value]}
                         onValueChange={(value) => handleBiomarkerChange(marker.id, value)}
@@ -208,7 +139,6 @@ const DiagnosticTool = () => {
             </Card>
           </div>
 
-          {/* Results Panel */}
           <div className="lg:col-span-1">
             <Card className="shadow-sm border border-gray-200 dark:border-gray-800 h-full">
               <CardHeader className="bg-gradient-to-r from-white to-gray-50 dark:from-gray-900 dark:to-gray-900/50 border-b border-gray-100 dark:border-gray-800 pb-3">

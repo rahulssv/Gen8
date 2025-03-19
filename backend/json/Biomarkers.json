@@ -1,92 +1,90 @@
-{
-  "biomarkers": [
-    {
-      "id": "glucose",
-      "name": "Blood Glucose",
-      "value": 100,
-      "unit": "mg/dL",
-      "normal_range": {
-        "min": 70,
-        "max": 100
-      },
-      "description": "Measures the amount of glucose (sugar) in your blood."
+[
+  {
+    "id": "glucose",
+    "name": "Blood Glucose",
+    "value": 100,
+    "unit": "mg/dL",
+    "normal_range": {
+      "min": 70,
+      "max": 100
     },
-    {
-      "id": "cholesterol",
-      "name": "Total Cholesterol",
-      "value": 200,
-      "unit": "mg/dL",
-      "normal_range": {
-        "min": 125,
-        "max": 200
-      },
-      "description": "Measures all cholesterol in your blood."
+    "description": "Measures the amount of glucose (sugar) in your blood."
+  },
+  {
+    "id": "cholesterol",
+    "name": "Total Cholesterol",
+    "value": 200,
+    "unit": "mg/dL",
+    "normal_range": {
+      "min": 125,
+      "max": 200
     },
-    {
-      "id": "hdl",
-      "name": "HDL Cholesterol",
-      "value": 55,
-      "unit": "mg/dL",
-      "normal_range": {
-        "min": 40,
-        "max": 60
-      },
-      "description": "High-density lipoprotein, often called 'good' cholesterol."
+    "description": "Measures all cholesterol in your blood."
+  },
+  {
+    "id": "hdl",
+    "name": "HDL Cholesterol",
+    "value": 55,
+    "unit": "mg/dL",
+    "normal_range": {
+      "min": 40,
+      "max": 60
     },
-    {
-      "id": "ldl",
-      "name": "LDL Cholesterol",
-      "value": 100,
-      "unit": "mg/dL",
-      "normal_range": {
-        "min": 0,
-        "max": 100
-      },
-      "description": "Low-density lipoprotein, often called 'bad' cholesterol."
+    "description": "High-density lipoprotein, often called 'good' cholesterol."
+  },
+  {
+    "id": "ldl",
+    "name": "LDL Cholesterol",
+    "value": 100,
+    "unit": "mg/dL",
+    "normal_range": {
+      "min": 0,
+      "max": 100
     },
-    {
-      "id": "triglycerides",
-      "name": "Triglycerides",
-      "value": 150,
-      "unit": "mg/dL",
-      "normal_range": {
-        "min": 0,
-        "max": 150
-      },
-      "description": "A type of fat in your blood that can increase risk of heart disease."
+    "description": "Low-density lipoprotein, often called 'bad' cholesterol."
+  },
+  {
+    "id": "triglycerides",
+    "name": "Triglycerides",
+    "value": 150,
+    "unit": "mg/dL",
+    "normal_range": {
+      "min": 0,
+      "max": 150
     },
-    {
-      "id": "a1c",
-      "name": "HbA1c",
-      "value": 5.7,
-      "unit": "%",
-      "normal_range": {
-        "min": 4.0,
-        "max": 5.7
-      },
-      "description": "Measures your average blood glucose level over the past 2-3 months."
+    "description": "A type of fat in your blood that can increase risk of heart disease."
+  },
+  {
+    "id": "a1c",
+    "name": "HbA1c",
+    "value": 5.7,
+    "unit": "%",
+    "normal_range": {
+      "min": 4.0,
+      "max": 5.7
     },
-    {
-      "id": "crp",
-      "name": "C-Reactive Protein",
-      "value": 2,
-      "unit": "mg/L",
-      "normal_range": {
-        "min": 0,
-        "max": 3
-      },
-      "description": "A marker of inflammation in the body."
+    "description": "Measures your average blood glucose level over the past 2-3 months."
+  },
+  {
+    "id": "crp",
+    "name": "C-Reactive Protein",
+    "value": 2,
+    "unit": "mg/L",
+    "normal_range": {
+      "min": 0,
+      "max": 3
     },
-    {
-      "id": "tsh",
-      "name": "TSH",
-      "value": 2.5,
-      "unit": "mIU/L",
-      "normal_range": {
-        "min": 0.4,
-        "max": 4.0
-      },
-      "description": "Thyroid-stimulating hormone, which regulates thyroid function."
-    }
-  ]
-}
+    "description": "A marker of inflammation in the body."
+  },
+  {
+    "id": "tsh",
+    "name": "TSH",
+    "value": 2.5,
+    "unit": "mIU/L",
+    "normal_range": {
+      "min": 0.4,
+      "max": 4.0
+    },
+    "description": "Thyroid-stimulating hormone, which regulates thyroid function."
+  }
+]

@@ -1,27 +1,39 @@
-{
-    "clinical_trials": [
-      {
+[
+    {
         "id": "NCT01719380",
         "title": "BEACON CRC Study: A Phase 3 Trial of Encorafenib and Cetuximab With or Without Binimetinib",
         "phase": "3",
         "status": "Completed",
-        "locations": ["United States", "Europe", "Asia"],
+        "locations": [
+            "United States",
+            "Europe",
+            "Asia"
+        ],
         "startDate": "Oct 2016",
         "primaryCompletion": "Feb 2019",
-        "interventions": ["Encorafenib", "Cetuximab", "Binimetinib"],
+        "interventions": [
+            "Encorafenib",
+            "Cetuximab",
+            "Binimetinib"
+        ],
         "url": "https://clinicaltrials.gov/ct2/show/NCT01719380"
-      },
-      {
+    },
+    {
         "id": "NCT04044430",
         "title": "A Study of Encorafenib Plus Cetuximab in Subjects With Previously Untreated BRAF V600E-Mutant Metastatic Colorectal Cancer",
         "phase": "2",
         "status": "Recruiting",
-        "locations": ["MD Anderson Cancer Center", "Mayo Clinic", "MSKCC"],
+        "locations": [
+            "MD Anderson Cancer Center",
+            "Mayo Clinic",
+            "MSKCC"
+        ],
         "startDate": "Aug 2019",
         "primaryCompletion": "Dec 2023",
-        "interventions": ["Encorafenib", "Cetuximab"],
+        "interventions": [
+            "Encorafenib",
+            "Cetuximab"
+        ],
         "url": "https://clinicaltrials.gov/ct2/show/NCT04044430"
-      }
-    ]
-  }
-  
+    }
+]

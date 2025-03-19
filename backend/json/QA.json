@@ -1,0 +1,18 @@
+[
+    {
+      "question": "Why is the BRAF V600E mutation associated with poor prognosis in colorectal cancer?",
+      "answer": "BRAF V600E mutation leads to constitutive activation of the MAPK pathway, promoting aggressive tumor behavior, reduced response to standard therapies, and is often associated with microsatellite instability and right-sided tumors, all contributing to poor prognosis."
+    },
+    {
+      "question": "What is the mechanism of action for encorafenib in treating BRAF V600E-mutated colorectal cancer?",
+      "answer": "Encorafenib is a selective BRAF inhibitor that specifically targets the mutated BRAF V600E protein, blocking its ability to activate the MAPK pathway and subsequently inhibiting cancer cell proliferation and survival."
+    },
+    {
+      "question": "Why is cetuximab combined with BRAF inhibitors in treatment regimens?",
+      "answer": "Cetuximab, an EGFR inhibitor, is combined with BRAF inhibitors to prevent feedback reactivation of the MAPK pathway through EGFR signaling, which occurs when BRAF is inhibited alone in colorectal cancer."
+    },
+    {
+      "question": "How does the presence of KRAS mutations affect BRAF-targeted therapy?",
+      "answer": "KRAS mutations can cause resistance to BRAF-targeted therapies as they activate the MAPK pathway downstream of BRAF, bypassing the inhibitory effect of BRAF inhibitors and reducing treatment efficacy."
+    }
+  ]

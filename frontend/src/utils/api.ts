@@ -1,6 +1,8 @@
 
 import { Article, QueryResult, ExtractionResult } from './types';
-
+import QA from '../../../backend/json/QA.json'
+import statistics from '../../../backend/json/Statistics.json'
+statistics
 // Mock API key storage - in a real app, this would be handled more securely
 let storedApiKey: string | null = null;
 
@@ -220,36 +222,7 @@ const generateMockRelations = (): any[] => {
 };
 
 const generateMockStatistics = (): any[] => {
-  return [
-    {
-      type: "survival rate",
-      value: 15,
-      unit: "months",
-      context: "Median overall survival with encorafenib + cetuximab"
-    },
-    {
-      type: "survival rate",
-      value: 10,
-      unit: "months",
-      context: "Median overall survival with standard therapy"
-    },
-    {
-      type: "efficacy",
-      value: 26.8,
-      unit: "%",
-      context: "Objective response rate with encorafenib + cetuximab"
-    },
-    {
-      type: "p-value",
-      value: 0.0003,
-      context: "Statistical significance of survival difference"
-    },
-    {
-      type: "hazard ratio",
-      value: 0.61,
-      context: "Hazard ratio for death with encorafenib + cetuximab vs standard therapy"
-    }
-  ];
+  return statistics ;
 };
 
 const generateMockSummary = (query: string): string => {
@@ -261,22 +234,5 @@ const generateMockSummary = (query: string): string => {
 };
 
 const generateMockQuestions = (query: string): any[] => {
-  return [
-    {
-      question: "Why is the BRAF V600E mutation associated with poor prognosis in colorectal cancer?",
-      answer: "BRAF V600E mutation leads to constitutive activation of the MAPK pathway, promoting aggressive tumor behavior, reduced response to standard therapies, and is often associated with microsatellite instability and right-sided tumors, all contributing to poor prognosis."
-    },
-    {
-      question: "What is the mechanism of action for encorafenib in treating BRAF V600E-mutated colorectal cancer?",
-      answer: "Encorafenib is a selective BRAF inhibitor that specifically targets the mutated BRAF V600E protein, blocking its ability to activate the MAPK pathway and subsequently inhibiting cancer cell proliferation and survival."
-    },
-    {
-      question: "Why is cetuximab combined with BRAF inhibitors in treatment regimens?",
-      answer: "Cetuximab, an EGFR inhibitor, is combined with BRAF inhibitors to prevent feedback reactivation of the MAPK pathway through EGFR signaling, which occurs when BRAF is inhibited alone in colorectal cancer."
-    },
-    {
-      question: "How does the presence of KRAS mutations affect BRAF-targeted therapy?",
-      answer: "KRAS mutations can cause resistance to BRAF-targeted therapies as they activate the MAPK pathway downstream of BRAF, bypassing the inhibitory effect of BRAF inhibitors and reducing treatment efficacy."
-    }
-  ];
+  return QA;
 };

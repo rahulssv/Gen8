@@ -1,0 +1,30 @@
+[
+    {
+      "type": "survival rate",
+      "value": 15,
+      "unit": "months",
+      "context": "Median overall survival with encorafenib + cetuximab"
+    },
+    {
+      "type": "survival rate",
+      "value": 10,
+      "unit": "months",
+      "context": "Median overall survival with standard therapy"
+    },
+    {
+      "type": "efficacy",
+      "value": 26.8,
+      "unit": "%",
+      "context": "Objective response rate with encorafenib + cetuximab"
+    },
+    {
+      "type": "p-value",
+      "value": 0.0003,
+      "context": "Statistical significance of survival difference"
+    },
+    {
+      "type": "hazard ratio",
+      "value": 0.61,
+      "context": "Hazard ratio for death with encorafenib + cetuximab vs standard therapy"
+    }
+  ]

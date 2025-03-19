@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import ArticleCard from '@/components/ArticleCard';
@@ -17,6 +16,48 @@ import { Article, QueryResult } from '@/utils/types';
 import { Loader2, ArrowLeft, MessageSquare } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import drugsDataJson from '../../../backend/json/DrugsData.json';
+import trialsDataJson from '../../../backend/json/TrialsData.json';
+import diseaseDataJson from '../../../backend/json/DisseaseData.json';
+import coexistingDataJson from '../../../backend/json/CoexistingData.json';
+
+// Define types for the imported JSON data
+interface Drug {
+  name: string;
+  type: string;
+  mechanism: string;
+  efficacy: string;
+  approvalStatus: string;
+  url?: string;
+}
+
+interface ClinicalTrial {
+  id: string;
+  title: string;
+  phase: string;
+  status: string;
+  locations: string[];
+  startDate: string;
+  primaryCompletion?: string;
+  interventions: string[];
+  url: string;
+}
+
+interface DiseaseAssociation {
+  disease: string;
+  relationship: string;
+  strength: 'Strong' | 'Moderate' | 'Weak';
+  evidence: string;
+  notes?: string;
+}
+
+interface CoexistingBiomarker {
+  name: string;
+  type: string;
+  effect: 'Synergistic' | 'Antagonistic' | 'No effect' | 'Variable';
+  clinicalImplication: string;
+  frequencyOfCooccurrence?: string;
+}
 
 const Results = () => {
   const location = useLocation();
@@ -27,106 +68,12 @@ const Results = () => {
   const [selectedArticles, setSelectedArticles] = useState<string[]>([]);
   const [chatbotOpen, setChatbotOpen] = useState(false);
 
-  // Mock data for the new cards
-  const [drugsData, setDrugsData] = useState([
-    {
-      name: "Encorafenib (Braftovi)",
-      type: "BRAF inhibitor",
-      mechanism: "Selectively inhibits BRAF V600E kinase activity",
-      efficacy: "Median OS of 9.3 months as monotherapy",
-      approvalStatus: "FDA Approved",
-      url: "https://www.braftovi.com/"
-    },
-    {
-      name: "Cetuximab (Erbitux)",
-      type: "EGFR inhibitor (monoclonal antibody)",
-      mechanism: "Binds to EGFR and blocks ligand binding",
-      efficacy: "Objective response rate of 26.8% when combined with encorafenib",
-      approvalStatus: "FDA Approved",
-      url: "https://www.erbitux.com/"
-    },
-    {
-      name: "Binimetinib (Mektovi)",
-      type: "MEK inhibitor",
-      mechanism: "Inhibits MEK1 and MEK2 activation and kinase activity",
-      efficacy: "Marginal additional benefit when added to encorafenib and cetuximab",
-      approvalStatus: "FDA Approved",
-      url: "https://www.mektovi.com/"
-    }
-  ]);
+  // Initialize state with typed JSON data
+  const [drugsData] = useState<Drug[]>(drugsDataJson);
+  const [trialsData] = useState<ClinicalTrial[]>(trialsDataJson);
+  const [diseaseData] = useState<DiseaseAssociation[]>(diseaseDataJson);
+  const [coexistingData] = useState<CoexistingBiomarker[]>(coexistingDataJson);
 
-  const [trialsData, setTrialsData] = useState([
-    {
-      id: "NCT01719380",
-      title: "BEACON CRC Study: A Phase 3 Trial of Encorafenib and Cetuximab With or Without Binimetinib",
-      phase: "3",
-      status: "Completed",
-      locations: ["United States", "Europe", "Asia"],
-      startDate: "Oct 2016",
-      primaryCompletion: "Feb 2019",
-      interventions: ["Encorafenib", "Cetuximab", "Binimetinib"],
-      url: "https://clinicaltrials.gov/ct2/show/NCT01719380"
-    },
-    {
-      id: "NCT04044430",
-      title: "A Study of Encorafenib Plus Cetuximab in Subjects With Previously Untreated BRAF V600E-Mutant Metastatic Colorectal Cancer",
-      phase: "2",
-      status: "Recruiting",
-      locations: ["MD Anderson Cancer Center", "Mayo Clinic", "MSKCC"],
-      startDate: "Aug 2019",
-      primaryCompletion: "Dec 2023",
-      interventions: ["Encorafenib", "Cetuximab"],
-      url: "https://clinicaltrials.gov/ct2/show/NCT04044430"
-    }
-  ]);
-
-  const [diseaseData, setDiseaseData] = useState([
-    {
-      disease: "Colorectal Cancer",
-      relationship: "BRAF V600E mutation is present in 8-12% of cases",
-      strength: "Strong" as const,
-      evidence: "Multiple large cohort studies with consistent findings",
-      notes: "Associated with microsatellite instability and right-sided tumor location"
-    },
-    {
-      disease: "Melanoma",
-      relationship: "BRAF V600E mutation is present in approximately 50% of cases",
-      strength: "Strong" as const,
-      evidence: "Established biomarker with FDA-approved targeted therapies"
-    },
-    {
-      disease: "Thyroid Cancer",
-      relationship: "BRAF V600E mutation occurs in 40-45% of papillary thyroid carcinomas",
-      strength: "Strong" as const,
-      evidence: "Multiple clinical studies with consistent findings"
-    }
-  ]);
-
-  const [coexistingData, setCoexistingData] = useState([
-    {
-      name: "KRAS mutation",
-      type: "Oncogene mutation",
-      effect: "Antagonistic" as const,
-      clinicalImplication: "Reduces efficacy of BRAF inhibitors; typically mutually exclusive with BRAF V600E",
-      frequencyOfCooccurrence: "Rare (<1%)"
-    },
-    {
-      name: "PIK3CA mutation",
-      type: "Oncogene mutation",
-      effect: "Synergistic" as const,
-      clinicalImplication: "May contribute to resistance to BRAF inhibitors; combination therapy targeting both pathways may be beneficial",
-      frequencyOfCooccurrence: "10-15% of BRAF-mutant CRC"
-    },
-    {
-      name: "Microsatellite Instability (MSI-H)",
-      type: "Molecular phenotype",
-      effect: "Variable" as const,
-      clinicalImplication: "MSI-H tumors with BRAF V600E may respond better to immunotherapy than MSS BRAF-mutant tumors",
-      frequencyOfCooccurrence: "~30% of BRAF-mutant CRC"
-    }
-  ]);
-
-  // Get query from URL
   const query = new URLSearchParams(location.search).get('q') || '';
 
   const fetchResults = async (searchQuery: string) => {
@@ -141,7 +88,6 @@ const Results = () => {
     try {
       const data = await searchArticles(searchQuery);
       setResult(data);
-      // Pre-select all articles by default
       setSelectedArticles(data.articles.map(article => article.id));
     } catch (err) {
       console.error('Error fetching results:', err);
@@ -164,8 +110,7 @@ const Results = () => {
   };
 
   const getSelectedArticles = (): Article[] => {
-    if (!result) return [];
-    return result.articles.filter(article => selectedArticles.includes(article.id));
+    return result?.articles.filter(article => selectedArticles.includes(article.id)) || [];
   };
 
   const toggleChatbot = () => {
@@ -175,7 +120,6 @@ const Results = () => {
   return (
     <div className="pt-24 pb-16 px-4 sm:px-6 min-h-screen">
       <div className="max-w-7xl mx-auto">
-        {/* Search bar and back button */}
         <div className="mb-8 flex flex-col sm:flex-row items-start sm:items-center gap-4">
           <Button
             variant="ghost"
@@ -204,7 +148,6 @@ const Results = () => {
           </div>
         ) : result ? (
           <div className="space-y-8">
-            {/* Query Info */}
             <div className="mb-6">
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
                 Results for: <span className="text-insight-600">{query}</span>
@@ -226,7 +169,6 @@ const Results = () => {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Left column: Articles */}
               <div className="lg:col-span-1">
                 <div className="mb-4 flex items-center justify-between">
                   <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -251,7 +193,6 @@ const Results = () => {
                 </div>
               </div>
 
-              {/* Right column: Tabs for Analysis */}
               <div className="lg:col-span-2 space-y-8">
                 <Tabs defaultValue="summary" className="w-full">
                   <TabsList className="w-full mb-4">
@@ -282,7 +223,6 @@ const Results = () => {
         ) : null}
       </div>
       
-      {/* Chatbot Panel */}
       {result && chatbotOpen && (
         <ChatbotPanel 
           result={result}
