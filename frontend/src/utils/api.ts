@@ -5,7 +5,8 @@ import statistics from '../../../backend/json/Statistics.json'
 import articles from '../../../backend/json/Articles.json'
 import entities from '../../../backend/json/Entities.json'
 import relations from '../../../backend/json/Relations.json'
-
+import summary from '../../../backend/json/Summary.json'
+import coexistingDatas from '../../../backend/json/CoexistingData.json'
 // Mock API key storage - in a real app, this would be handled more securely
 let storedApiKey: string | null = null;
 
@@ -46,10 +47,8 @@ export const analyzeSingleArticle = async (articleUrl: string): Promise<Extracti
     entities: generateMockEntities(""),
     relations: generateMockRelations(),
     statistics: generateMockStatistics(),
-    coexistingFactors: ["KRAS mutation", "MSI-H status", "PIK3CA mutation"],
-    summary: `This article discusses the implications of various mutations in colorectal cancer treatment. 
-              It highlights the importance of testing for BRAF V600E mutations and suggests potential 
-              treatment options including encorafenib combined with cetuximab.`
+    coexistingFactors: coexistingDatas.map((codata)=>codata.name),
+    summary: summary
   };
 };
 
@@ -82,11 +81,11 @@ const generateMockStatistics = (): any[] => {
 };
 
 const generateMockSummary = (query: string): string => {
-  if (query.toLowerCase().includes('braf') && query.toLowerCase().includes('colorectal')) {
-    return `Based on analysis of recent clinical research, the combination of encorafenib and cetuximab shows the most promising results for treating BRAF V600E-mutated colorectal cancer, with a median overall survival of 15 months compared to 10 months with standard therapy (HR 0.61, p=0.0003). This combination demonstrated an objective response rate of 26.8%. The addition of binimetinib (MEK inhibitor) to this combination showed marginal additional benefit in the BEACON CRC trial. Treatment efficacy is reduced when KRAS mutations coexist. Current evidence supports encorafenib plus cetuximab as the preferred treatment approach, though ongoing trials are exploring additional combinations with immunotherapy for potentially improved outcomes.`;
-  }
+  // if (query.toLowerCase().includes('braf') && query.toLowerCase().includes('colorectal')) {
+  //   return `Based on analysis of recent clinical research, the combination of encorafenib and cetuximab shows the most promising results for treating BRAF V600E-mutated colorectal cancer, with a median overall survival of 15 months compared to 10 months with standard therapy (HR 0.61, p=0.0003). This combination demonstrated an objective response rate of 26.8%. The addition of binimetinib (MEK inhibitor) to this combination showed marginal additional benefit in the BEACON CRC trial. Treatment efficacy is reduced when KRAS mutations coexist. Current evidence supports encorafenib plus cetuximab as the preferred treatment approach, though ongoing trials are exploring additional combinations with immunotherapy for potentially improved outcomes.`;
+  // }
   
-  return `Based on analysis of the selected articles, the most effective treatment approach involves targeted therapy specific to the molecular profile of the disease. Multiple clinical trials have demonstrated improved outcomes with combination therapies that address specific pathways. Statistical analysis shows significant improvements in survival metrics compared to standard approaches. The research highlights the importance of comprehensive molecular testing to guide treatment decisions and optimize patient outcomes.`;
+  return summary;
 };
 
 const generateMockQuestions = (query: string): any[] => {
