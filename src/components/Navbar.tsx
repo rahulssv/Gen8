@@ -1,94 +1,120 @@
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { Microscope, Menu, X } from 'lucide-react';
+import { FileText, Database, Search, TestTube, FileSearch } from 'lucide-react';
 
 const Navbar = () => {
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
+      setScrolled(window.scrollY > 10);
     };
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
-
-  const NavLink = ({ to, children }: { to: string, children: React.ReactNode }) => {
-    const isActive = location.pathname === to;
-    
-    return (
-      <Link 
-        to={to} 
-        className={cn(
-          "relative px-3 py-2 transition-all duration-300 text-secondary-foreground hover:text-primary",
-          isActive && "text-primary font-medium"
-        )}
-        onClick={() => setIsMobileMenuOpen(false)}
-      >
-        {children}
-        {isActive && (
-          <span className="absolute bottom-0 left-0 w-full h-0.5 bg-primary rounded-full" />
-        )}
-      </Link>
-    );
-  };
-
   return (
-    <header 
+    <header
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
-        isScrolled ? "bg-white/90 backdrop-blur-md shadow-sm" : "bg-transparent"
+        'fixed top-0 left-0 right-0 z-40 transition-all-300',
+        scrolled
+          ? 'py-3 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md shadow-sm'
+          : 'py-5 bg-transparent'
       )}
     >
-      <div className="container mx-auto px-4 md:px-6 py-4">
-        <div className="flex items-center justify-between">
-          <Link 
-            to="/" 
-            className="flex items-center space-x-2 text-primary transition-transform duration-300 hover:scale-105"
-            onClick={() => setIsMobileMenuOpen(false)}
+      <div className="container flex items-center justify-between">
+        <Link
+          to="/"
+          className="flex items-center space-x-2 group"
+          aria-label="InsightMed Home"
+        >
+          <div className="w-10 h-10 rounded-md flex items-center justify-center bg-insight-500 text-white 
+                          transition-all duration-300 group-hover:scale-105">
+            <Database className="w-5 h-5" />
+          </div>
+          <div className="font-bold text-xl">
+            <span className="text-gray-900 dark:text-white">Insight</span>
+            <span className="text-insight-500">Med</span>
+          </div>
+        </Link>
+
+        <nav className="hidden md:flex items-center space-x-1">
+          <NavLink href="/" active={location.pathname === '/'}>
+            <Search className="w-4 h-4 mr-1.5" />
+            <span>Search</span>
+          </NavLink>
+          <NavLink href="/article-analyzer" active={location.pathname === '/article-analyzer'}>
+            <FileText className="w-4 h-4 mr-1.5" />
+            <span>Article Analyzer</span>
+          </NavLink>
+          <NavLink href="/diagnostic-tool" active={location.pathname === '/diagnostic-tool'}>
+            <TestTube className="w-4 h-4 mr-1.5" />
+            <span>Diagnostic Tool</span>
+          </NavLink>
+          <NavLink href="/biomarker-reference" active={location.pathname === '/biomarker-reference'}>
+            <FileSearch className="w-4 h-4 mr-1.5" />
+            <span>Biomarker Reference</span>
+          </NavLink>
+        </nav>
+        
+        <div className="flex items-center space-x-4">
+          <Link
+            to="/article-analyzer"
+            className="md:hidden p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            aria-label="Article Analyzer"
           >
-            <Microscope size={24} className="text-primary" />
-            <span className="font-semibold text-xl">OncoSignal</span>
+            <FileText className="w-5 h-5" />
           </Link>
-
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-6">
-            <NavLink to="/">Home</NavLink>
-            <NavLink to="/diagnostic">Diagnostic Tool</NavLink>
-            <NavLink to="/reference">Biomarker Reference</NavLink>
-          </nav>
-
-          {/* Mobile Menu Button */}
-          <button 
-            className="md:hidden text-gray-600 hover:text-primary focus:outline-none"
-            onClick={toggleMobileMenu}
-            aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
+          <Link
+            to="/diagnostic-tool"
+            className="md:hidden p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            aria-label="Diagnostic Tool"
           >
-            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
+            <TestTube className="w-5 h-5" />
+          </Link>
+          <Link
+            to="/biomarker-reference"
+            className="md:hidden p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            aria-label="Biomarker Reference"
+          >
+            <FileSearch className="w-5 h-5" />
+          </Link>
+          <Link
+            to="/"
+            className="md:hidden p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            aria-label="Search"
+          >
+            <Search className="w-5 h-5" />
+          </Link>
         </div>
       </div>
-
-      {/* Mobile Navigation */}
-      {isMobileMenuOpen && (
-        <div className="md:hidden absolute top-full left-0 right-0 bg-white/95 backdrop-blur-lg shadow-lg animate-fadeIn">
-          <div className="container mx-auto px-4 py-4 flex flex-col space-y-4">
-            <NavLink to="/">Home</NavLink>
-            <NavLink to="/diagnostic">Diagnostic Tool</NavLink>
-            <NavLink to="/reference">Biomarker Reference</NavLink>
-          </div>
-        </div>
-      )}
     </header>
+  );
+};
+
+interface NavLinkProps {
+  href: string;
+  active: boolean;
+  children: React.ReactNode;
+}
+
+const NavLink = ({ href, active, children }: NavLinkProps) => {
+  return (
+    <Link
+      to={href}
+      className={cn(
+        "flex items-center px-3 py-2 rounded-full text-sm font-medium transition-all-200",
+        active
+          ? "bg-insight-100 text-insight-700"
+          : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+      )}
+    >
+      {children}
+    </Link>
   );
 };
 

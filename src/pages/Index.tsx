@@ -1,266 +1,240 @@
-
-import React, { useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import SearchBar from '@/components/SearchBar';
 import { Button } from '@/components/ui/button';
+import { Database, FileText, BarChart, Search } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { ArrowRight, Activity, FileText, Target, Database } from 'lucide-react';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
 
 const Index = () => {
-  const featuresRef = useRef<HTMLDivElement>(null);
-
-  // Intersection Observer for scroll animations
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('animate-fadeIn');
-          }
-        });
-      },
-      { threshold: 0.1 }
-    );
-
-    document.querySelectorAll('.scroll-animation').forEach((el) => {
-      observer.observe(el);
-      el.classList.add('opacity-0');
-    });
-
-    return () => observer.disconnect();
-  }, []);
-
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
-      
       {/* Hero Section */}
-      <section className="pt-32 pb-16 md:pt-40 md:pb-24 bg-white">
-        <div className="container mx-auto px-4 md:px-6">
-          <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-6 text-balance">
-              Precision Oncology Diagnostics for Breast Cancer
-            </h1>
-            <p className="text-xl text-secondary-foreground mb-8 max-w-2xl mx-auto">
-              Advanced biomarker analysis platform for clinical evaluation of breast cancer subtypes, staging, and personalized treatment recommendations.
-            </p>
-            <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Link to="/diagnostic">
-                <Button size="lg" className="bg-primary hover:bg-primary/90 text-white px-8">
-                  Start Diagnosis
-                  <ArrowRight size={16} className="ml-2" />
-                </Button>
-              </Link>
+      <div className="h-screen flex flex-col items-center justify-center px-6 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-radial from-insight-50/30 to-transparent dark:from-insight-950/10 dark:to-transparent" />
+        
+        <div className="w-full max-w-4xl mx-auto text-center z-10 animate-fade-in">
+          <div className="mb-3 flex justify-center">
+            <Badge className="text-sm font-medium px-3 py-1 bg-insight-100 text-insight-700 border-insight-200">
+              Medical Research Insights
+            </Badge>
+          </div>
+          
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 tracking-tight text-gray-900 dark:text-white">
+            Discover clinical insights from<br /> 
+            <span className="text-insight-600">research literature</span>
+          </h1>
+          
+          <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-10 max-w-2xl mx-auto">
+            Extract, analyze, and summarize critical information from medical research 
+            databases to support evidence-based practice and decision making.
+          </p>
+          
+          <div className="mb-10">
+            <SearchBar size="large" className="max-w-3xl mx-auto" />
+          </div>
+          
+          <div className="flex flex-wrap justify-center gap-4">
+            <Link to="/article-analyzer">
               <Button 
-                size="lg" 
                 variant="outline" 
-                className="border-gray-200"
-                onClick={() => featuresRef.current?.scrollIntoView({ behavior: 'smooth' })}
+                className="h-11 px-5 rounded-full border-gray-300 dark:border-gray-700 bg-white/50 dark:bg-black/20 backdrop-blur-sm hover:bg-white hover:shadow-sm"
+              >
+                <FileText className="mr-2 h-4 w-4" />
+                Analyze Single Article
+              </Button>
+            </Link>
+            
+            <a 
+              href="#features"
+              className="inline-flex"
+            >
+              <Button 
+                variant="ghost" 
+                className="h-11 px-5 rounded-full text-gray-600 hover:text-gray-900 hover:bg-white/50 dark:hover:bg-white/5"
               >
                 Learn More
               </Button>
-            </div>
+            </a>
           </div>
         </div>
-      </section>
+        
+        <div className="absolute bottom-10 left-0 right-0 flex justify-center animate-bounce">
+          <a href="#features" className="text-gray-400 hover:text-gray-600">
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              className="h-6 w-6" 
+              fill="none" 
+              viewBox="0 0 24 24" 
+              stroke="currentColor"
+            >
+              <path 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                strokeWidth={2} 
+                d="M19 14l-7 7m0 0l-7-7m7 7V3" 
+              />
+            </svg>
+          </a>
+        </div>
+      </div>
       
-      {/* Feature Overview */}
-      <section ref={featuresRef} className="py-16 md:py-24 bg-gradient-to-b from-white to-gray-50">
-        <div className="container mx-auto px-4 md:px-6">
-          <div className="max-w-3xl mx-auto text-center mb-16">
-            <h2 className="text-3xl font-bold mb-4">Comprehensive Diagnostic Platform</h2>
-            <p className="text-secondary-foreground">
-              OncoSignal provides clinicians with advanced tools to analyze biomarkers and diagnose breast cancer with precision and confidence.
+      {/* Features Section */}
+      <div id="features" className="py-20 px-6 bg-white dark:bg-gray-900">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+              Streamline Your Research Curation Process
+            </h2>
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+              Our platform uses advanced AI to extract and synthesize information from multiple research sources.
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 scroll-animation">
-              <div className="h-12 w-12 bg-primary/10 rounded-xl flex items-center justify-center mb-4">
-                <Database size={24} className="text-primary" />
-              </div>
-              <h3 className="font-medium text-lg mb-2">Biomarker Analysis</h3>
-              <p className="text-secondary-foreground text-sm">
-                Comprehensive analysis of blood-based and liquid biopsy biomarkers to aid in cancer diagnosis and monitoring.
-              </p>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <FeatureCard 
+              icon={<Search className="h-8 w-8 text-insight-600" />}
+              title="Intelligent Search"
+              description="Our AI searches across multiple databases including PubMed, Taylor & Francis, and Science Direct to find the most relevant articles."
+            />
             
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 scroll-animation">
-              <div className="h-12 w-12 bg-primary/10 rounded-xl flex items-center justify-center mb-4">
-                <Activity size={24} className="text-primary" />
-              </div>
-              <h3 className="font-medium text-lg mb-2">Cancer Staging</h3>
-              <p className="text-secondary-foreground text-sm">
-                Evidence-based staging assessments using multiple biomarkers and clinical parameters.
-              </p>
-            </div>
+            <FeatureCard 
+              icon={<Database className="h-8 w-8 text-insight-600" />}
+              title="Information Extraction"
+              description="Identifies biomarkers, mutations, drugs, and their relationships using advanced Natural Language Processing techniques."
+            />
             
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 scroll-animation">
-              <div className="h-12 w-12 bg-primary/10 rounded-xl flex items-center justify-center mb-4">
-                <Target size={24} className="text-primary" />
-              </div>
-              <h3 className="font-medium text-lg mb-2">Subtype Classification</h3>
-              <p className="text-secondary-foreground text-sm">
-                Identify breast cancer molecular subtypes to guide targeted therapy selection and treatment planning.
-              </p>
-            </div>
+            <FeatureCard 
+              icon={<BarChart className="h-8 w-8 text-insight-600" />}
+              title="Data Visualization"
+              description="Presents statistical findings from research in clear, interactive charts to help you understand complex relationships."
+            />
             
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 scroll-animation">
-              <div className="h-12 w-12 bg-primary/10 rounded-xl flex items-center justify-center mb-4">
-                <FileText size={24} className="text-primary" />
-              </div>
-              <h3 className="font-medium text-lg mb-2">Treatment Insights</h3>
-              <p className="text-secondary-foreground text-sm">
-                Clinical decision support with evidence-based treatment recommendations tailored to patient profiles.
-              </p>
-            </div>
+            <FeatureCard 
+              icon={<FileText className="h-8 w-8 text-insight-600" />}
+              title="Concise Summaries"
+              description="Generates evidence-based summaries that focus on your specific query, avoiding generic overviews."
+            />
+            
+            <FeatureCard 
+              icon={
+                <svg className="h-8 w-8 text-insight-600" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M9 12H15M9 16H15M17 21H7C5.89543 21 5 20.1046 5 19V5C5 3.89543 5.89543 3 7 3H12.5858C12.851 3 13.1054 3.10536 13.2929 3.29289L18.7071 8.70711C18.8946 8.89464 19 9.149 19 9.41421V19C19 20.1046 18.1046 21 17 21Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              }
+              title="PDF Export"
+              description="Export your research findings in professionally formatted PDF reports for easy sharing and reference."
+            />
+            
+            <FeatureCard 
+              icon={
+                <svg className="h-8 w-8 text-insight-600" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M8 12H8.01M12 12H12.01M16 12H16.01M21 12C21 16.4183 16.9706 20 12 20C10.4607 20 9.01172 19.6565 7.74467 19.0511L3 20L4.39499 16.28C3.51156 15.0423 3 13.5743 3 12C3 7.58172 7.02944 4 12 4C16.9706 4 21 7.58172 21 12Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              }
+              title="AI Q&A"
+              description="Get answers to specific questions about your research topic, powered by our AI that understands medical terminology."
+            />
           </div>
         </div>
-      </section>
+      </div>
       
-      {/* Information Section */}
-      <section className="py-16 md:py-24 bg-white scroll-animation">
-        <div className="container mx-auto px-4 md:px-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
-            <div>
-              <h2 className="text-3xl font-bold mb-6">Advanced Biomarker Analytics</h2>
-              <p className="text-secondary-foreground mb-6">
-                OncoSignal integrates analysis of traditional and emerging biomarkers to provide a comprehensive view of breast cancer status and progression.
-              </p>
-              <ul className="space-y-4">
-                <li className="flex items-start">
-                  <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center mt-0.5 mr-3">
-                    <span className="text-primary text-sm font-medium">1</span>
-                  </div>
-                  <div>
-                    <h3 className="font-medium mb-1">Blood-based Markers</h3>
-                    <p className="text-sm text-secondary-foreground">
-                      Analysis of CA 15-3, CEA, and other serum biomarkers that correlate with tumor burden and disease progression.
-                    </p>
-                  </div>
-                </li>
-                
-                <li className="flex items-start">
-                  <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center mt-0.5 mr-3">
-                    <span className="text-primary text-sm font-medium">2</span>
-                  </div>
-                  <div>
-                    <h3 className="font-medium mb-1">Molecular Subtyping</h3>
-                    <p className="text-sm text-secondary-foreground">
-                      Evaluation of ER, PR, HER2, and Ki-67 status to determine molecular subtype and guide treatment decisions.
-                    </p>
-                  </div>
-                </li>
-                
-                <li className="flex items-start">
-                  <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center mt-0.5 mr-3">
-                    <span className="text-primary text-sm font-medium">3</span>
-                  </div>
-                  <div>
-                    <h3 className="font-medium mb-1">Liquid Biopsy</h3>
-                    <p className="text-sm text-secondary-foreground">
-                      Analysis of circulating tumor cells (CTCs) and cell-free DNA to detect minimal residual disease and early recurrence.
-                    </p>
-                  </div>
-                </li>
-              </ul>
-              
-              <div className="mt-8">
-                <Link to="/reference">
-                  <Button variant="outline" className="border-gray-200">
-                    Explore Biomarkers
-                    <ArrowRight size={16} className="ml-2" />
-                  </Button>
-                </Link>
-              </div>
-            </div>
+      {/* Use Cases Section */}
+      <div className="py-20 px-6 bg-gray-50 dark:bg-gray-800/50">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+              Who Benefits from InsightMed?
+            </h2>
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+              Our platform is designed for various professionals in the medical research field.
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <UseCaseCard 
+              title="Clinical Researchers"
+              description="Rapidly synthesize information from multiple studies to identify promising research directions and treatment options."
+            />
             
-            <div className="glass-panel rounded-xl p-1 rotate-1 animate-float">
-              <div className="bg-white rounded-lg p-6 -rotate-1 border border-gray-100">
-                <div className="space-y-6">
-                  <div className="flex items-center">
-                    <div className="w-20 text-sm font-medium">CA 15-3:</div>
-                    <div className="flex-1">
-                      <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                        <div className="h-full bg-primary/80 rounded-full" style={{ width: '40%' }}></div>
-                      </div>
-                    </div>
-                    <div className="w-12 text-right text-sm font-medium">40 U/mL</div>
-                  </div>
-                  
-                  <div className="flex items-center">
-                    <div className="w-20 text-sm font-medium">CEA:</div>
-                    <div className="flex-1">
-                      <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                        <div className="h-full bg-yellow-400 rounded-full" style={{ width: '75%' }}></div>
-                      </div>
-                    </div>
-                    <div className="w-12 text-right text-sm font-medium">7.5 ng/mL</div>
-                  </div>
-                  
-                  <div className="flex items-center">
-                    <div className="w-20 text-sm font-medium">HER2:</div>
-                    <div className="flex-1">
-                      <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                        <div className="h-full bg-orange-400 rounded-full" style={{ width: '100%' }}></div>
-                      </div>
-                    </div>
-                    <div className="w-12 text-right text-sm font-medium">3+</div>
-                  </div>
-                  
-                  <div className="flex items-center">
-                    <div className="w-20 text-sm font-medium">Ki-67:</div>
-                    <div className="flex-1">
-                      <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                        <div className="h-full bg-green-400 rounded-full" style={{ width: '25%' }}></div>
-                      </div>
-                    </div>
-                    <div className="w-12 text-right text-sm font-medium">25%</div>
-                  </div>
-                  
-                  <div className="pt-4 border-t border-gray-100">
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <div className="text-xs text-gray-500">Diagnosis</div>
-                        <div className="font-medium">HER2-Positive</div>
-                      </div>
-                      <div>
-                        <div className="text-xs text-gray-500">Stage</div>
-                        <div className="font-medium">Stage II</div>
-                      </div>
-                      <div>
-                        <div className="text-xs text-gray-500">Risk</div>
-                        <Badge className="bg-yellow-100 text-yellow-800">MODERATE</Badge>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <UseCaseCard 
+              title="Bio-Curators"
+              description="Efficiently extract and organize biomedical information from research literature for databases and knowledge bases."
+            />
+            
+            <UseCaseCard 
+              title="Healthcare Professionals"
+              description="Access evidence-based summaries to support clinical decision-making and stay updated on the latest research."
+            />
+            
+            <UseCaseCard 
+              title="Pharmaceutical Companies"
+              description="Accelerate drug discovery by identifying relationships between biomarkers, mutations, and potential therapeutic targets."
+            />
           </div>
         </div>
-      </section>
+      </div>
       
       {/* CTA Section */}
-      <section className="py-16 md:py-24 bg-primary/5 scroll-animation">
-        <div className="container mx-auto px-4 md:px-6">
-          <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl font-bold mb-6">Begin Your Diagnostic Assessment</h2>
-            <p className="text-xl text-secondary-foreground mb-8">
-              Use our advanced diagnostic tool to analyze biomarker data and receive clinical insights for your patients.
-            </p>
-            <Link to="/diagnostic">
-              <Button size="lg" className="bg-primary hover:bg-primary/90 text-white px-8">
-                Start Diagnosis
-                <ArrowRight size={16} className="ml-2" />
+      <div className="py-20 px-6 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
+            Ready to transform your research workflow?
+          </h2>
+          <p className="text-xl text-gray-600 dark:text-gray-300 mb-10 max-w-2xl mx-auto">
+            Start extracting valuable insights from medical literature today.
+          </p>
+          
+          <div className="flex flex-wrap justify-center gap-4">
+            <a href="#top">
+              <Button 
+                className="h-12 px-8 rounded-full bg-insight-500 hover:bg-insight-600"
+              >
+                <Search className="mr-2 h-4 w-4" />
+                Start Searching
+              </Button>
+            </a>
+            
+            <Link to="/article-analyzer">
+              <Button 
+                variant="outline" 
+                className="h-12 px-8 rounded-full border-gray-300 dark:border-gray-700"
+              >
+                <FileText className="mr-2 h-4 w-4" />
+                Try Article Analyzer
               </Button>
             </Link>
           </div>
         </div>
-      </section>
-      
-      <Footer />
+      </div>
+    </div>
+  );
+};
+
+const FeatureCard = ({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) => {
+  return (
+    <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-md">
+      <div className="mb-4 inline-block p-3 bg-insight-50 dark:bg-insight-900/20 rounded-lg">
+        {icon}
+      </div>
+      <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+        {title}
+      </h3>
+      <p className="text-gray-600 dark:text-gray-300">
+        {description}
+      </p>
+    </div>
+  );
+};
+
+const UseCaseCard = ({ title, description }: { title: string; description: string }) => {
+  return (
+    <div className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-md">
+      <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+        {title}
+      </h3>
+      <p className="text-gray-600 dark:text-gray-300">
+        {description}
+      </p>
     </div>
   );
 };

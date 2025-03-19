@@ -1,227 +1,374 @@
 
-import React, { useState } from 'react';
-import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search } from 'lucide-react';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import BiomarkerCard from '@/components/BiomarkerCard';
-import { BIOMARKER_RANGES } from '@/utils/diagnosticUtils';
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { FileSearch, Search, Dna } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 const BiomarkerReference = () => {
-  const [searchQuery, setSearchQuery] = useState('');
+  const { toast } = useToast();
+  const [query, setQuery] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [searchResult, setSearchResult] = useState<BiomarkerInfo | null>(null);
   
-  // Define biomarker reference data
-  const biomarkerData = [
-    {
-      id: "CA153",
-      name: "Cancer Antigen 15-3 (CA 15-3)",
-      description: "A protein produced by normal breast cells and breast cancer cells, often elevated in breast cancer.",
-      significance: "Used to monitor response to breast cancer treatment and detect recurrence. Higher levels may indicate disease progression or metastasis.",
-      range: BIOMARKER_RANGES.CA153,
-      normalRange: "< 25 U/mL",
-      type: "blood" as const,
+  interface BiomarkerInfo {
+    name: string;
+    aliases: string[];
+    type: string;
+    description: string;
+    clinicalSignificance: string[];
+    normalRange?: {
+      value: string;
+      unit: string;
+    };
+    associatedDiseases: string[];
+    testMethods: string[];
+    references: string[];
+  }
+
+  // This would typically come from an API
+  const biomarkerDatabase: Record<string, BiomarkerInfo> = {
+    "braf": {
+      name: "BRAF",
+      aliases: ["B-Raf proto-oncogene", "v-Raf murine sarcoma viral oncogene homolog B"],
+      type: "Gene/Protein",
+      description: "BRAF is a gene that encodes a protein called B-Raf, which is involved in sending signals inside cells that direct cell growth. Mutations in this gene can cause cells to grow and divide abnormally, potentially leading to cancer.",
+      clinicalSignificance: [
+        "Critical driver mutation in several cancer types",
+        "Targetable by BRAF inhibitor drugs like vemurafenib, dabrafenib, and encorafenib",
+        "Most common mutation is V600E, representing ~90% of all BRAF mutations"
+      ],
+      associatedDiseases: [
+        "Melanoma",
+        "Colorectal cancer",
+        "Thyroid cancer",
+        "Hairy cell leukemia",
+        "Langerhans cell histiocytosis"
+      ],
+      testMethods: [
+        "PCR-based methods",
+        "Next-generation sequencing (NGS)",
+        "Immunohistochemistry for BRAF V600E"
+      ],
+      references: [
+        "Davies H, et al. Mutations of the BRAF gene in human cancer. Nature. 2002;417:949-954.",
+        "Flaherty KT, et al. Inhibition of mutated, activated BRAF in metastatic melanoma. N Engl J Med. 2010;363:809-819."
+      ]
     },
-    {
-      id: "CEA",
-      name: "Carcinoembryonic Antigen (CEA)",
-      description: "A protein found in the tissues of a developing baby. In adults, it can be a sign of cancer.",
-      significance: "Elevated in various cancers including breast cancer. Most useful for monitoring metastatic disease, especially to the liver.",
-      range: BIOMARKER_RANGES.CEA,
-      normalRange: "< 2.5 ng/mL",
-      type: "blood" as const,
+    "egfr": {
+      name: "EGFR",
+      aliases: ["Epidermal Growth Factor Receptor", "HER1", "ErbB1"],
+      type: "Gene/Protein",
+      description: "EGFR is a transmembrane receptor that binds to epidermal growth factor, leading to cellular proliferation, differentiation, and survival. Mutations or overexpression can lead to uncontrolled cell division.",
+      clinicalSignificance: [
+        "Key driver in non-small cell lung cancer",
+        "Targetable by tyrosine kinase inhibitors like erlotinib, gefitinib, and osimertinib",
+        "Common mutations include exon 19 deletions and L858R point mutation"
+      ],
+      associatedDiseases: [
+        "Non-small cell lung cancer",
+        "Colorectal cancer",
+        "Glioblastoma",
+        "Head and neck squamous cell carcinoma"
+      ],
+      testMethods: [
+        "PCR-based methods",
+        "Next-generation sequencing (NGS)",
+        "FISH for gene amplification",
+        "Immunohistochemistry for protein expression"
+      ],
+      references: [
+        "Lynch TJ, et al. Activating mutations in the epidermal growth factor receptor underlying responsiveness of non-small-cell lung cancer to gefitinib. N Engl J Med. 2004;350:2129-2139.",
+        "Paez JG, et al. EGFR mutations in lung cancer: correlation with clinical response to gefitinib therapy. Science. 2004;304:1497-1500."
+      ]
     },
-    {
-      id: "HER2",
-      name: "Human Epidermal Growth Factor Receptor 2",
-      description: "A protein that promotes cancer cell growth. When overexpressed, indicates HER2-positive breast cancer.",
-      significance: "Determines eligibility for HER2-targeted therapies like trastuzumab. Associated with more aggressive disease but good response to targeted therapy.",
-      range: BIOMARKER_RANGES.HER2,
-      normalRange: "0 to 1+ (IHC) or non-amplified (FISH)",
-      type: "tissue" as const,
+    "psa": {
+      name: "PSA",
+      aliases: ["Prostate-Specific Antigen", "Kallikrein-3", "KLK3"],
+      type: "Protein/Blood Biomarker",
+      description: "PSA is a protein produced by the prostate gland. Blood levels of PSA can be elevated in men with prostate cancer, but also in non-cancerous conditions like prostatitis and benign prostatic hyperplasia.",
+      clinicalSignificance: [
+        "Screening tool for prostate cancer",
+        "Monitoring treatment response and recurrence",
+        "Higher levels correlate with increased risk of prostate cancer"
+      ],
+      normalRange: {
+        value: "<4.0",
+        unit: "ng/mL"
+      },
+      associatedDiseases: [
+        "Prostate cancer",
+        "Benign prostatic hyperplasia",
+        "Prostatitis"
+      ],
+      testMethods: [
+        "Blood test (ELISA)",
+        "Free PSA test",
+        "PSA velocity (rate of change over time)"
+      ],
+      references: [
+        "Catalona WJ, et al. Measurement of prostate-specific antigen in serum as a screening test for prostate cancer. N Engl J Med. 1991;324:1156-1161.",
+        "Thompson IM, et al. Prevalence of prostate cancer among men with a prostate-specific antigen level ≤4.0 ng per milliliter. N Engl J Med. 2004;350:2239-2246."
+      ]
     },
-    {
-      id: "Ki67",
-      name: "Ki-67 Proliferation Index",
-      description: "A protein marker for cellular proliferation, indicating how quickly tumor cells are dividing.",
-      significance: "Higher values indicate more aggressive tumors. Used to distinguish between Luminal A and Luminal B subtypes.",
-      range: BIOMARKER_RANGES.Ki67,
-      normalRange: "< 15%",
-      type: "tissue" as const,
+    "tnf-alpha": {
+      name: "TNF-α",
+      aliases: ["Tumor Necrosis Factor alpha", "TNF", "Cachectin"],
+      type: "Cytokine/Protein",
+      description: "TNF-α is a cytokine involved in systemic inflammation and acute phase reaction. It is produced primarily by activated macrophages, although it can be produced by other cell types.",
+      clinicalSignificance: [
+        "Key mediator of inflammatory response",
+        "Target for biologic therapies in autoimmune diseases",
+        "Elevated in various inflammatory conditions"
+      ],
+      normalRange: {
+        value: "<8.1",
+        unit: "pg/mL"
+      },
+      associatedDiseases: [
+        "Rheumatoid arthritis",
+        "Inflammatory bowel disease",
+        "Psoriasis",
+        "Ankylosing spondylitis",
+        "Sepsis"
+      ],
+      testMethods: [
+        "ELISA",
+        "Radioimmunoassay",
+        "Flow cytometry"
+      ],
+      references: [
+        "Feldmann M, et al. TNF alpha as a therapeutic target in rheumatoid arthritis. Circ Res. 2002;90:123-132.",
+        "Brennan FM, et al. Inhibitory effect of TNF alpha antibodies on synovial cell interleukin-1 production in rheumatoid arthritis. Lancet. 1989;2:244-247."
+      ]
     },
-    {
-      id: "ER",
-      name: "Estrogen Receptor (ER)",
-      description: "Hormone receptors that bind to estrogen, potentially stimulating cancer growth.",
-      significance: "ER-positive tumors are eligible for hormonal therapies. Positive status generally indicates better prognosis.",
-      range: BIOMARKER_RANGES.ER,
-      normalRange: "< 1% of cells (negative)",
-      type: "tissue" as const,
-    },
-    {
-      id: "PR",
-      name: "Progesterone Receptor (PR)",
-      description: "Hormone receptors that bind to progesterone, potentially stimulating cancer growth.",
-      significance: "PR-positive tumors may respond to hormonal therapies. Often co-expressed with ER.",
-      range: BIOMARKER_RANGES.PR,
-      normalRange: "< 1% of cells (negative)",
-      type: "tissue" as const,
-    },
-    {
-      id: "p53",
-      name: "p53 Tumor Suppressor",
-      description: "A protein that normally prevents cancer formation. Mutations lead to loss of tumor suppression.",
-      significance: "Mutated p53 is associated with more aggressive disease and worse outcomes in breast cancer.",
-      range: BIOMARKER_RANGES.p53,
-      normalRange: "< 5% of cells (wild-type expression)",
-      type: "tissue" as const,
-    },
-    {
-      id: "CTCs",
-      name: "Circulating Tumor Cells",
-      description: "Cancer cells that have detached from the tumor and entered the bloodstream.",
-      significance: "Higher CTC counts correlate with disease progression, metastasis risk, and worse prognosis.",
-      range: BIOMARKER_RANGES.CTCs,
-      normalRange: "0 cells/7.5mL of blood",
-      type: "liquid-biopsy" as const,
-    },
-    {
-      id: "ctDNA",
-      name: "Circulating Tumor DNA",
-      description: "Fragments of DNA from tumor cells found in the bloodstream.",
-      significance: "Used for non-invasive monitoring of tumor burden, treatment response, and emergence of resistance mutations.",
-      range: {
-        name: "Circulating Tumor DNA",
-        low: 0,
-        normal: 0.01,
-        high: 1,
-        critical: 10,
+    "hba1c": {
+      name: "HbA1c",
+      aliases: ["Glycated hemoglobin", "Hemoglobin A1c", "A1C"],
+      type: "Blood Biomarker",
+      description: "HbA1c is formed when hemoglobin joins with glucose in the blood, becoming 'glycated'. By measuring HbA1c, clinicians can get an overall picture of average blood sugar levels over a period of weeks/months.",
+      clinicalSignificance: [
+        "Diagnosis of diabetes mellitus",
+        "Monitoring long-term glycemic control",
+        "Predictor of diabetes complications"
+      ],
+      normalRange: {
+        value: "4.0-5.7",
         unit: "%"
       },
-      normalRange: "< 0.01% of total cfDNA",
-      type: "liquid-biopsy" as const,
-    },
-    {
-      id: "BRCA",
-      name: "BRCA1/2 Mutation Status",
-      description: "Inherited mutations in BRCA1 or BRCA2 genes that increase risk of breast and ovarian cancers.",
-      significance: "Pathogenic mutations indicate higher risk of breast cancer and may inform surgical decisions and PARP inhibitor eligibility.",
-      range: {
-        name: "BRCA1/2",
-        low: 0,
-        normal: 0,
-        high: 1,
-        critical: 1,
-        unit: ""
-      },
-      normalRange: "No pathogenic variants",
-      type: "tissue" as const,
-    },
-  ];
-  
-  // Filter biomarkers based on search query
-  const filteredBiomarkers = biomarkerData.filter(biomarker => 
-    biomarker.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    biomarker.description.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-  
-  // Group biomarkers by type
-  const bloodBiomarkers = filteredBiomarkers.filter(bm => bm.type === 'blood');
-  const tissueBiomarkers = filteredBiomarkers.filter(bm => bm.type === 'tissue');
-  const liquidBiopsyBiomarkers = filteredBiomarkers.filter(bm => bm.type === 'liquid-biopsy');
+      associatedDiseases: [
+        "Diabetes mellitus",
+        "Prediabetes",
+        "Metabolic syndrome"
+      ],
+      testMethods: [
+        "High-performance liquid chromatography (HPLC)",
+        "Immunoassay",
+        "Capillary electrophoresis"
+      ],
+      references: [
+        "American Diabetes Association. Diagnosis and classification of diabetes mellitus. Diabetes Care. 2010;33:S62-S69.",
+        "Nathan DM, et al. The effect of intensive treatment of diabetes on the development and progression of long-term complications in insulin-dependent diabetes mellitus. N Engl J Med. 1993;329:977-986."
+      ]
+    }
+  };
+
+  const handleSearch = () => {
+    if (!query.trim()) {
+      toast({
+        title: "Search Error",
+        description: "Please enter a biomarker name to search",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    
+    // Simulate API call with setTimeout
+    setTimeout(() => {
+      const normalizedQuery = query.toLowerCase().trim();
+      
+      // Find the biomarker in our database
+      const result = Object.values(biomarkerDatabase).find(biomarker => 
+        biomarker.name.toLowerCase() === normalizedQuery ||
+        biomarker.aliases.some(alias => alias.toLowerCase().includes(normalizedQuery))
+      );
+      
+      if (result) {
+        setSearchResult(result);
+        toast({
+          title: "Biomarker Found",
+          description: `Information for ${result.name} is now available`,
+        });
+      } else {
+        setSearchResult(null);
+        toast({
+          title: "Biomarker Not Found",
+          description: "We couldn't find information on this biomarker. Try another search term.",
+          variant: "destructive"
+        });
+      }
+      
+      setIsLoading(false);
+    }, 1000);
+  };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
-      
-      <main className="flex-1 pt-24 pb-16">
-        <div className="container mx-auto px-4 md:px-6">
-          <div className="max-w-6xl mx-auto">
-            <div className="mb-12 text-center">
-              <h1 className="text-3xl font-bold mb-4">Biomarker Reference Guide</h1>
-              <p className="text-secondary-foreground max-w-2xl mx-auto">
-                Comprehensive information on biomarkers used in breast cancer diagnosis, classification, and monitoring.
-              </p>
-            </div>
-            
-            <div className="mb-8 max-w-md mx-auto">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-                <Input
-                  type="text"
-                  placeholder="Search biomarkers..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 diagnostic-input"
-                />
-              </div>
-            </div>
-            
-            <Tabs defaultValue="all" className="w-full">
-              <TabsList className="grid w-full max-w-md mx-auto grid-cols-4">
-                <TabsTrigger value="all">All</TabsTrigger>
-                <TabsTrigger value="blood">Blood</TabsTrigger>
-                <TabsTrigger value="tissue">Tissue</TabsTrigger>
-                <TabsTrigger value="liquid-biopsy">Liquid Biopsy</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="all" className="mt-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filteredBiomarkers.map((biomarker) => (
-                    <BiomarkerCard key={biomarker.id} biomarker={biomarker} />
-                  ))}
-                </div>
-                {filteredBiomarkers.length === 0 && (
-                  <div className="text-center py-12">
-                    <p className="text-secondary-foreground">No biomarkers found matching your search criteria.</p>
-                  </div>
-                )}
-              </TabsContent>
-              
-              <TabsContent value="blood" className="mt-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {bloodBiomarkers.map((biomarker) => (
-                    <BiomarkerCard key={biomarker.id} biomarker={biomarker} />
-                  ))}
-                </div>
-                {bloodBiomarkers.length === 0 && (
-                  <div className="text-center py-12">
-                    <p className="text-secondary-foreground">No blood biomarkers found matching your search criteria.</p>
-                  </div>
-                )}
-              </TabsContent>
-              
-              <TabsContent value="tissue" className="mt-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {tissueBiomarkers.map((biomarker) => (
-                    <BiomarkerCard key={biomarker.id} biomarker={biomarker} />
-                  ))}
-                </div>
-                {tissueBiomarkers.length === 0 && (
-                  <div className="text-center py-12">
-                    <p className="text-secondary-foreground">No tissue biomarkers found matching your search criteria.</p>
-                  </div>
-                )}
-              </TabsContent>
-              
-              <TabsContent value="liquid-biopsy" className="mt-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {liquidBiopsyBiomarkers.map((biomarker) => (
-                    <BiomarkerCard key={biomarker.id} biomarker={biomarker} />
-                  ))}
-                </div>
-                {liquidBiopsyBiomarkers.length === 0 && (
-                  <div className="text-center py-12">
-                    <p className="text-secondary-foreground">No liquid biopsy biomarkers found matching your search criteria.</p>
-                  </div>
-                )}
-              </TabsContent>
-            </Tabs>
-          </div>
+    <div className="pt-24 pb-16 px-4 sm:px-6 min-h-screen">
+      <div className="max-w-7xl mx-auto">
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            Biomarker Reference Database
+          </h1>
+          <p className="text-gray-600 dark:text-gray-300">
+            Search our database for detailed information about biomarkers, genes, and molecular targets.
+          </p>
         </div>
-      </main>
-      
-      <Footer />
+
+        {/* Search Section */}
+        <div className="mb-8">
+          <Card className="shadow-sm border border-gray-200 dark:border-gray-800">
+            <CardHeader className="bg-gradient-to-r from-white to-gray-50 dark:from-gray-900 dark:to-gray-900/50 border-b border-gray-100 dark:border-gray-800 pb-3">
+              <Badge variant="outline" className="mb-2 bg-insight-50 text-insight-700 border-insight-200">
+                Reference Search
+              </Badge>
+              <CardTitle className="text-xl font-semibold text-gray-900 dark:text-white">
+                Find Biomarker Information
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="flex flex-col sm:flex-row gap-3">
+                <div className="flex-1">
+                  <Input
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Enter biomarker name (e.g., BRAF, PSA, HbA1c)"
+                    className="w-full"
+                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                  />
+                </div>
+                <Button 
+                  onClick={handleSearch} 
+                  disabled={isLoading}
+                  className="bg-insight-500 hover:bg-insight-600 ml-0 sm:ml-2"
+                >
+                  {isLoading ? (
+                    <>Searching...</>
+                  ) : (
+                    <>
+                      <Search className="mr-2 h-4 w-4" />
+                      Search
+                    </>
+                  )}
+                </Button>
+              </div>
+              <div className="mt-4 text-sm text-gray-500 dark:text-gray-400">
+                <p>Try searching for: BRAF, EGFR, PSA, TNF-alpha, HbA1c</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Results Section */}
+        {searchResult && (
+          <Card className="shadow-sm border border-gray-200 dark:border-gray-800">
+            <CardHeader className="bg-gradient-to-r from-white to-gray-50 dark:from-gray-900 dark:to-gray-900/50 border-b border-gray-100 dark:border-gray-800 pb-3">
+              <Badge variant="outline" className="mb-2 bg-insight-50 text-insight-700 border-insight-200">
+                Biomarker Information
+              </Badge>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-xl font-semibold text-gray-900 dark:text-white flex items-center">
+                  <Dna className="mr-2 h-5 w-5 text-insight-500" />
+                  {searchResult.name}
+                </CardTitle>
+                <Badge className="bg-insight-100 text-insight-800">
+                  {searchResult.type}
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="space-y-6">
+                {/* Aliases */}
+                {searchResult.aliases.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">Also Known As</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {searchResult.aliases.map((alias, index) => (
+                        <Badge key={index} variant="outline" className="bg-gray-50 text-gray-800">
+                          {alias}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Description */}
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">Description</h3>
+                  <p className="text-gray-800 dark:text-gray-200">{searchResult.description}</p>
+                </div>
+                
+                {/* Normal Range if available */}
+                {searchResult.normalRange && (
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">Normal Range</h3>
+                    <Badge className="bg-green-100 text-green-800 px-3 py-1">
+                      {searchResult.normalRange.value} {searchResult.normalRange.unit}
+                    </Badge>
+                  </div>
+                )}
+                
+                {/* Clinical Significance */}
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">Clinical Significance</h3>
+                  <ul className="list-disc pl-5 space-y-1 text-gray-800 dark:text-gray-200">
+                    {searchResult.clinicalSignificance.map((point, index) => (
+                      <li key={index}>{point}</li>
+                    ))}
+                  </ul>
+                </div>
+                
+                {/* Associated Diseases */}
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">Associated Diseases</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {searchResult.associatedDiseases.map((disease, index) => (
+                      <Badge key={index} className="bg-red-100 text-red-800">
+                        {disease}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* Test Methods */}
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">Testing Methods</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {searchResult.testMethods.map((method, index) => (
+                      <Badge key={index} variant="outline" className="bg-purple-50 text-purple-800 border-purple-200">
+                        {method}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* References */}
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">Key References</h3>
+                  <div className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
+                    {searchResult.references.map((reference, index) => (
+                      <p key={index} className="italic">{reference}</p>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </div>
   );
 };
