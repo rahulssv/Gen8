@@ -1,57 +1,166 @@
 [
-    {
+  {
+      "id": "20",
+      "title": "Aggregation of blood platelets by adrenaline and its uptake.",
+      "authors": [
+          "Barthel W",
+          "Markwardt F"
+      ],
+      "journal": "Biochemical pharmacology",
+      "year": null,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/20/",
+      "abstract": "This study investigates the aggregation of blood platelets by adrenaline and its uptake. The research was conducted in the field of biochemical pharmacology.",
+      "source": "PubMed",
+      "relevanceScore": null
+  },
+  {
       "id": "1",
-      "title": "Novel treatment approaches in metastatic cancer",
-      "authors": ["Kopetz S", "Grothey A", "Yaeger R"],
-      "journal": "New England journal of Medicine",
-      "year": 2023,
-      "url": "https://pubmed.ncbi.nlm.nih.gov/article1",
-      "abstract": "The BRAF V600E mutation occurs in 8 to 12% of patients with metastatic colorectal cancer and is associated with poor prognosis...",
+      "title": "Formate assay in body fluids: application in methanol poisoning.",
+      "authors": [
+          "Makar A B",
+          "McMartin K E",
+          "Palese M",
+          "Tephly T R"
+      ],
+      "journal": "Biochemical medicine",
+      "year": null,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/1/",
+      "abstract": "The paper describes a formate assay method used for analyzing body fluids. The assay's utility is demonstrated in the context of methanol poisoning.",
       "source": "PubMed",
-      "relevanceScore": 0.92
-    },
-    {
+      "relevanceScore": null
+  },
+  {
+      "id": "25426838",
+      "title": "Clonal hematopoiesis and blood-cancer risk inferred from blood DNA sequence.",
+      "authors": [
+          "Genovese Giulio",
+          "Kähler Anna K",
+          "Handsaker Robert E",
+          "Lindberg Johan",
+          "Rose Samuel A",
+          "Bakhoum Samuel F",
+          "Chambert Kimberly",
+          "Mick Eran",
+          "Neale Benjamin M",
+          "Fromer Menachem",
+          "Purcell Shaun M",
+          "Svantesson Oscar",
+          "Landén Mikael",
+          "Höglund Martin",
+          "Lehmann Sören",
+          "Gabriel Stacey B",
+          "Moran Jennifer L",
+          "Lander Eric S",
+          "Sullivan Patrick F",
+          "Sklar Pamela",
+          "Grönberg Henrik",
+          "Hultman Christina M",
+          "McCarroll Steven A"
+      ],
+      "journal": "The New England journal of medicine",
+      "year": null,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/25426838/",
+      "abstract": "This research explores the link between clonal hematopoiesis and blood cancer risk by analyzing blood DNA sequences. The study infers this relationship from genomic data.",
+      "source": "PubMed",
+      "relevanceScore": null
+  },
+  {
       "id": "2",
-      "title": "Targeted therapy advancements in solid tumors",
-      "authors": ["Van Cutsem E", "Huijberts S", "Grothey A"],
-      "journal": "journal of Clinical Oncology",
-      "year": 2022,
-      "url": "https://pubmed.ncbi.nlm.nih.gov/article2",
-      "abstract": "BRAF V600E-mutated metastatic colorectal cancer has a poor prognosis with limited treatment options...",
-      "source": "Taylor & Francis",
-      "relevanceScore": 0.89
-    },
-    {
-      "id": "3",
-      "title": "Molecular Profiling and Targeted Therapy in BRAF-Mutant Colorectal Cancer",
-      "authors": ["Parseghian CM", "Napolitano S", "Loree JM"],
-      "journal": "Clinical Cancer Research",
-      "year": 2022,
-      "url": "https://pubmed.ncbi.nlm.nih.gov/article3",
-      "abstract": "Colorectal cancer (CRC) with BRAF V600E mutation represents a distinct molecular subtype with poor prognosis...",
-      "source": "Science Direct",
-      "relevanceScore": 0.87
-    },
-    {
-      "id": "4",
-      "title": "BEACON CRC Study: A Phase 3 Trial of Encorafenib and Cetuximab With or Without Binimetinib",
-      "authors": ["Kopetz S", "Grothey A", "Van Cutsem E"],
-      "journal": "Lancet Oncology",
-      "year": 2021,
-      "url": "https://pubmed.ncbi.nlm.nih.gov/article4",
-      "abstract": "The triplet combination of encorafenib, binimetinib, and cetuximab showed promising efficacy in patients with BRAF V600E-mutated metastatic colorectal cancer...",
+      "title": "Delineation of the intimate details of the backbone conformation of pyridine nucleotide coenzymes in aqueous solution.",
+      "authors": [
+          "Bose K S",
+          "Sarma R H"
+      ],
+      "journal": "Biochemical and biophysical research communications",
+      "year": null,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/2/",
+      "abstract": "The study focuses on detailing the backbone conformation of pyridine nucleotide coenzymes in an aqueous solution. It was investigated through biochemical and biophysical research methods.",
       "source": "PubMed",
-      "relevanceScore": 0.85
-    },
-    {
+      "relevanceScore": null
+  },
+  {
+      "id": "25636396",
+      "title": "Issues in adult blood cancer survivorship care.",
+      "authors": [
+          "Bugos Kelly G"
+      ],
+      "journal": "Seminars in oncology nursing",
+      "year": null,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/25636396/",
+      "abstract": "This paper discusses various issues related to survivorship care for adults who have had blood cancer. It addresses these issues from an oncology nursing perspective.",
+      "source": "PubMed",
+      "relevanceScore": null
+  },
+  {
+      "id": "3",
+      "title": "Metal substitutions incarbonic anhydrase: a halide ion probe study.",
+      "authors": [
+          "Smith R J",
+          "Bryant R G"
+      ],
+      "journal": "Biochemical and biophysical research communications",
+      "year": null,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/3/",
+      "abstract": "The research examines the effects of metal substitutions in carbonic anhydrase, utilizing a halide ion probe. The work involves biochemical and biophysical research methods.",
+      "source": "PubMed",
+      "relevanceScore": null
+  },
+  {
+      "id": "26163601",
+      "title": "Multi-Target Cytotoxic Actions of Flavonoids in Blood Cancer Cells.",
+      "authors": [
+          "Sak Katrin",
+          "Everaus Hele"
+      ],
+      "journal": "Asian Pacific journal of cancer prevention : APJCP",
+      "year": null,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/26163601/",
+      "abstract": "This study investigates the multi-target cytotoxic actions of flavonoids in blood cancer cells. It explores the potential of flavonoids as agents in cancer prevention.",
+      "source": "PubMed",
+      "relevanceScore": null
+  },
+  {
+      "id": "4",
+      "title": "Effect of chloroquine on cultured fibroblasts: release of lysosomal hydrolases and inhibition of their uptake.",
+      "authors": [
+          "Wiesmann U N",
+          "DiDonato S",
+          "Herschkowitz N N"
+      ],
+      "journal": "Biochemical and biophysical research communications",
+      "year": null,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/4/",
+      "abstract": "The paper explores the effect of chloroquine on cultured fibroblasts, specifically looking at the release of lysosomal hydrolases and the inhibition of their uptake. The research was carried out using biochemical and biophysical methods.",
+      "source": "PubMed",
+      "relevanceScore": null
+  },
+  {
+      "id": "28600336",
+      "title": "Diagnosis and classification of hematologic malignancies on the basis of genetics.",
+      "authors": [
+          "Taylor Justin",
+          "Xiao Wenbin",
+          "Abdel-Wahab Omar"
+      ],
+      "journal": "Blood",
+      "year": null,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/28600336/",
+      "abstract": "This paper discusses the diagnosis and classification of hematologic malignancies by genetic information. It highlights the role of genetics in understanding and categorizing these cancers.",
+      "source": "PubMed",
+      "relevanceScore": null
+  },
+  {
       "id": "5",
-      "title": "Clinical Outcome of Patients with BRAF V600E Mutation in Colorectal Cancer",
-      "authors": ["Loupakis F", "Cremolini C", "Masi G"],
-      "journal": "British journal of Cancer",
-      "year": 2022,
-      "url": "https://pubmed.ncbi.nlm.nih.gov/article5",
-      "abstract": "BRAF V600E mutation is associated with distinctive clinicopathological features and poor prognosis in metastatic colorectal cancer...",
-      "source": "Science Direct",
-      "relevanceScore": 0.82
-    }
-  ]
+      "title": "Atomic models for the polypeptide backbones of myohemerythrin and hemerythrin.",
+      "authors": [
+          "Hendrickson W A",
+          "Ward K B"
+      ],
+      "journal": "Biochemical and biophysical research communications",
+      "year": null,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/5/",
+      "abstract": "The study presents atomic models for the polypeptide backbones of myohemerythrin and hemerythrin. The models were developed using biochemical and biophysical research methods.",
+      "source": "PubMed",
+      "relevanceScore": null
+  }
+]
