@@ -1,6 +1,11 @@
-from flask import Flask, request, jsonify
-from flask_sqlalchemy import SQLAlchemy
+from fastapi import FastAPI, HTTPException, status, Depends
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from typing import List, Optional
+from sqlalchemy import create_engine, Column, Integer, String, Text, Float, DateTime, ForeignKey
 from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy.orm import sessionmaker, Session, relationship
+from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
 import os
 from dotenv import load_dotenv
@@ -12,77 +17,104 @@ import google.generativeai as genai
 # Load environment variables
 load_dotenv()
 
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)
-
-# Database Models
-class Article(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    pmid = db.Column(db.String(20), unique=True)
-    title = db.Column(db.String(500))
-    authors = db.Column(ARRAY(db.String(200)))
-    journal = db.Column(db.String(200))
-    year = db.Column(db.Integer)
-    url = db.Column(db.String(500))
-    abstract = db.Column(db.Text)
-    source = db.Column(db.String(50))
-    relevance_score = db.Column(db.Float)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-class Entity(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(200), index=True)
-    type = db.Column(db.String(50), index=True)
-    mentions = db.Column(db.Integer, default=1)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-class Relation(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    subject_id = db.Column(db.Integer, db.ForeignKey('entity.id'))
-    predicate = db.Column(db.String(200))
-    object_id = db.Column(db.Integer, db.ForeignKey('entity.id'))
-    confidence = db.Column(db.Float)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-    subject = db.relationship('Entity', foreign_keys=[subject_id])
-    object = db.relationship('Entity', foreign_keys=[object_id])
-
-class StatisticalData(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    type = db.Column(db.String(50))
-    value = db.Column(db.String(100))
-    unit = db.Column(db.String(50))
-    context = db.Column(db.Text)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-# Initialize database
-with app.app_context():
-    db.create_all()
-
 # Configure Gemini API
 genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
 
-def save_to_database(articles, entities, relations, stats):
+# Database setup
+SQLALCHEMY_DATABASE_URL = os.getenv('DATABASE_URL')
+engine = create_engine(SQLALCHEMY_DATABASE_URL)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+Base = declarative_base()
+
+# Database Models
+class Article(Base):
+    __tablename__ = 'article'
+    id = Column(Integer, primary_key=True)
+    pmid = Column(String(20), unique=True)
+    title = Column(String(500))
+    authors = Column(ARRAY(String(200)))
+    journal = Column(String(200))
+    year = Column(Integer)
+    url = Column(String(500))
+    abstract = Column(Text)
+    source = Column(String(50))
+    relevance_score = Column(Float)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class Entity(Base):
+    __tablename__ = 'entity'
+    id = Column(Integer, primary_key=True)
+    name = Column(String(200), index=True)
+    type = Column(String(50), index=True)
+    mentions = Column(Integer, default=1)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class Relation(Base):
+    __tablename__ = 'relation'
+    id = Column(Integer, primary_key=True)
+    subject_id = Column(Integer, ForeignKey('entity.id'))
+    predicate = Column(String(200))
+    object_id = Column(Integer, ForeignKey('entity.id'))
+    confidence = Column(Float)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    subject = relationship('Entity', foreign_keys=[subject_id], backref='relations_as_subject')
+    object = relationship('Entity', foreign_keys=[object_id], backref='relations_as_object')
+
+class StatisticalData(Base):
+    __tablename__ = 'statistical_data'
+    id = Column(Integer, primary_key=True)
+    type = Column(String(50))
+    value = Column(String(100))
+    unit = Column(String(50))
+    context = Column(Text)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+# Create tables
+Base.metadata.create_all(bind=engine)
+
+# FastAPI app setup
+app = FastAPI()
+
+# CORS configuration
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Dependency to get DB session
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+# Pydantic models
+class SearchQuery(BaseModel):
+    query: str
+
+def save_to_database(db: Session, articles, entities, relations, stats):
     """Save processed data to PostgreSQL database"""
     try:
         # Clear existing data
-        db.session.query(Article).delete()
-        db.session.query(Entity).delete()
-        db.session.query(Relation).delete()
-        db.session.query(StatisticalData).delete()
+        db.query(Article).delete()
+        db.query(Entity).delete()
+        db.query(Relation).delete()
+        db.query(StatisticalData).delete()
         
         # Add new data
-        db.session.bulk_save_objects(articles)
-        db.session.bulk_save_objects(entities)
-        db.session.bulk_save_objects(relations)
-        db.session.bulk_save_objects(stats)
+        db.bulk_save_objects(articles)
+        db.bulk_save_objects(entities)
+        db.bulk_save_objects(relations)
+        db.bulk_save_objects(stats)
         
-        db.session.commit()
+        db.commit()
         return True
     except Exception as e:
-        db.session.rollback()
+        db.rollback()
         print(f"Database error: {str(e)}")
         return False
 
@@ -243,31 +275,23 @@ def generate_best_articles_json(best_pmids, full_details):
             title=details.get("title", "Title not available"),
             authors=[],
             journal=details.get("journal", "Unknown Journal"),
-            year=datetime.now().year,  # Temporary placeholder
+            year=datetime.now().year,
             url=f"https://pubmed.ncbi.nlm.nih.gov/{pmid}/",
             abstract=details.get("abstract", "No abstract available."),
             source="PubMed",
-            relevance_score=0.9  # Temporary placeholder
+            relevance_score=0.9
         ))
     return best_articles
 
-@app.route('/search', methods=['POST'])
-def handle_search():
-    query = request.json.get('query', '')
+@app.post("/search")
+def handle_search(search_query: SearchQuery, db: Session = Depends(get_db)):
+    query = search_query.query
     
-    # Fetch initial PMIDs
     pmids = fetch_pubmed_pmids(query, max_results=100)
-    
-    # Get basic details (title + journal)
     basic_details = fetch_pubmed_details(pmids)
-    
-    # First round of selection using titles
     selected_pmids = select_top_papers_with_gemini(basic_details, query)
-    
-    # Fetch abstracts for selected papers
     summaries = fetch_pubmed_summaries(selected_pmids)
     
-    # Combine details with abstracts
     full_details = {
         pmid: {
             **basic_details.get(pmid, {}),
@@ -276,25 +300,20 @@ def handle_search():
         for pmid in selected_pmids
     }
     
-    # Final selection with abstracts
     best_pmids = deep_search_with_gemini(full_details, query)
-    
-    # Generate article objects
     best_articles = generate_best_articles_json(best_pmids, full_details)
-    
-    # Process entities and relations using full details
     entities, relations = process_entities_and_relations(full_details)
     stats = process_statistics(full_details)
     
-    if save_to_database(best_articles, entities, relations, stats):
-        return jsonify({"status": "success", "message": "Data processed successfully"})
+    if save_to_database(db, best_articles, entities, relations, stats):
+        return {"status": "success", "message": "Data processed successfully"}
     else:
-        return jsonify({"status": "error", "message": "Database save failed"}), 500
-    
-@app.route('/articles', methods=['GET'])
-def get_articles():
-    articles = Article.query.order_by(Article.relevance_score.desc()).all()
-    return jsonify([{
+        raise HTTPException(status_code=500, detail="Database save failed")
+
+@app.get("/articles")
+def get_articles(db: Session = Depends(get_db)):
+    articles = db.query(Article).order_by(Article.relevance_score.desc()).all()
+    return [{
         'id': str(article.pmid),
         'title': article.title,
         'authors': article.authors,
@@ -304,32 +323,39 @@ def get_articles():
         'abstract': article.abstract,
         'source': article.source,
         'relevanceScore': article.relevance_score
-    } for article in articles])
+    } for article in articles]
 
-@app.route('/entities', methods=['GET'])
-def get_entities():
-    entities = Entity.query.all()
-    return jsonify([{
-        'name': entity.name,
-        'type': entity.type,
-        'mentions': entity.mentions,
-        'relations': [{
-            'subject': rel.subject.name,
-            'predicate': rel.predicate,
-            'object': rel.object.name,
-            'confidence': rel.confidence
-        } for rel in entity.relations_as_subject]
-    } for entity in entities])
+@app.get("/entities")
+def get_entities(db: Session = Depends(get_db)):
+    entities = db.query(Entity).all()
+    results = []
+    for entity in entities:
+        relations = []
+        for rel in entity.relations_as_subject:
+            relations.append({
+                'subject': rel.subject.name,
+                'predicate': rel.predicate,
+                'object': rel.object.name,
+                'confidence': rel.confidence
+            })
+        results.append({
+            'name': entity.name,
+            'type': entity.type,
+            'mentions': entity.mentions,
+            'relations': relations
+        })
+    return results
 
-@app.route('/statistics', methods=['GET'])
-def get_statistics():
-    stats = StatisticalData.query.all()
-    return jsonify([{
+@app.get("/statistics")
+def get_statistics(db: Session = Depends(get_db)):
+    stats = db.query(StatisticalData).all()
+    return [{
         'type': stat.type,
         'value': stat.value,
         'unit': stat.unit,
         'context': stat.context
-    } for stat in stats])
+    } for stat in stats]
 
 if __name__ == '__main__':
-    app.run(port=5000, debug=True)
+    import uvicorn
+    uvicorn.run(app, port=8000, debug=True)
