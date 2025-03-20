@@ -5,7 +5,7 @@ import re
 from xml.etree import ElementTree as ET
 
 # Configure Gemini API Key
-genai.configure(api_key="AIzaSyA7FzIqNJdPHT4MlutG-10deT0vBclCChw")
+genai.configure(api_key="put ur api key here")
 
 # Function to search PubMed and retrieve PMIDs
 def search_pubmed(query, max_results=100):
