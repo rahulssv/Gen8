@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { TestTube, Microscope, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import biomarkersData from '../../../backend/json/Biomarkers.json'
+import biomarkersData from '../../../backend/json/Biomarker.json'
 
 interface Biomarker {
   id: string;

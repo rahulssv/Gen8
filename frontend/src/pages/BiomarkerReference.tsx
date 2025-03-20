@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { FileSearch, Search, Dna } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import biomarkerDatabase from '../../../backend/json/BiomarkerDatabase.json';
+import biomarkerDatabase from '../../../backend/json/BiomarkerInfo.json';
 
 const BiomarkerReference = () => {
   const { toast } = useToast();
