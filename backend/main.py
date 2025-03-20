@@ -2,10 +2,8 @@ from fastapi import FastAPI, HTTPException, status, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional
-from sqlalchemy import create_engine, Column, Integer, String, Text, Float, DateTime, ForeignKey
-from sqlalchemy.dialects.postgresql import ARRAY
-from sqlalchemy.orm import sessionmaker, Session, relationship
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, Session
 from datetime import datetime
 import os
 from dotenv import load_dotenv
@@ -13,6 +11,8 @@ import requests
 import re
 import json
 import google.generativeai as genai
+from biomarker_extraction import extract_biomarkers_from_articles, get_articles_from_db
+from models import Base, Article, Entity, Relation, StatisticalData , Biomarker # Import models from models.py
 
 # Load environment variables
 load_dotenv()
@@ -24,50 +24,6 @@ genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
 SQLALCHEMY_DATABASE_URL = os.getenv('DATABASE_URL')
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()
-
-# Database Models
-class Article(Base):
-    __tablename__ = 'article'
-    id = Column(Integer, primary_key=True)
-    pmid = Column(String(20), unique=True)
-    title = Column(String(500))
-    authors = Column(ARRAY(String(200)))
-    journal = Column(String(200))
-    year = Column(Integer)
-    url = Column(String(500))
-    abstract = Column(Text)
-    source = Column(String(50))
-    relevance_score = Column(Float)
-    created_at = Column(DateTime, default=datetime.utcnow)
-
-class Entity(Base):
-    __tablename__ = 'entity'
-    id = Column(Integer, primary_key=True)
-    name = Column(String(200), index=True)
-    type = Column(String(50), index=True)
-    mentions = Column(Integer, default=1)
-    created_at = Column(DateTime, default=datetime.utcnow)
-
-class Relation(Base):
-    __tablename__ = 'relation'
-    id = Column(Integer, primary_key=True)
-    subject_id = Column(Integer, ForeignKey('entity.id'))
-    predicate = Column(String(200))
-    object_id = Column(Integer, ForeignKey('entity.id'))
-    confidence = Column(Float)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    subject = relationship('Entity', foreign_keys=[subject_id], backref='relations_as_subject')
-    object = relationship('Entity', foreign_keys=[object_id], backref='relations_as_object')
-
-class StatisticalData(Base):
-    __tablename__ = 'statistical_data'
-    id = Column(Integer, primary_key=True)
-    type = Column(String(50))
-    value = Column(String(100))
-    unit = Column(String(50))
-    context = Column(Text)
-    created_at = Column(DateTime, default=datetime.utcnow)
 
 # Create tables
 Base.metadata.create_all(bind=engine)
@@ -283,6 +239,21 @@ def generate_best_articles_json(best_pmids, full_details):
         ))
     return best_articles
 
+def generate_biomarkers_json(biomarkers_data):
+    print("[DEBUG] Saving biomarkers...")
+    biomarkers = []
+    for biomarker_data in biomarkers_data:
+        biomarker = Biomarker(
+            id=biomarker_data['id'],
+            name=biomarker_data['name'],
+            value=biomarker_data['value'],
+            unit=biomarker_data.get('unit'),
+            normal_range=biomarker_data.get('normal_range'),
+            description=biomarker_data['description']
+        )
+        biomarkers.append(biomarker)
+    return biomarkers
+
 @app.post("/search")
 def handle_search(search_query: SearchQuery, db: Session = Depends(get_db)):
     query = search_query.query
@@ -355,6 +326,16 @@ def get_statistics(db: Session = Depends(get_db)):
         'unit': stat.unit,
         'context': stat.context
     } for stat in stats]
+
+
+@app.get("/biomarkers")
+def get_biomarkers(query: str, db: Session = Depends(get_db)):
+    articles = get_articles_from_db(db)
+    biomarkers = extract_biomarkers_from_articles(articles, query)
+    print("[DEBUG] Biomarkers to be returned:")
+    generate_biomarkers_json(biomarkers)
+    print(biomarkers)
+    return biomarkers
 
 if __name__ == '__main__':
     import uvicorn
