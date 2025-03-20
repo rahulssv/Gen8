@@ -4,7 +4,6 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
 from typing import Optional, Dict
-from pydantic import Base
 
 Base = declarative_base()
 
@@ -50,22 +49,23 @@ class StatisticalData(Base):
     context = Column(Text)
     created_at = Column(DateTime, default=datetime.utcnow)
 
-class Biomarker(BaseModel):
-    id: str
-    name: str
-    value: str
-    unit: Optional[str] = None
-    normal_range: Optional[Dict[str, float]] = None
-    description: Optional[str] = None  # Made optional to prevent validation issues
+class NormalRange(Base):
+    __tablename__ = "normal_ranges"
 
-class Config:
-        orm_mode = True 
+    id = Column(Integer, primary_key=True, index=True)
+    min = Column(Float, nullable=True)
+    max = Column(Float, nullable=True)
 
-class Biomarker(Base):
-    __tablename__ = 'biomarker'
-    id = Column(Integer, primary_key=True)
-    type = Column(String(50))
-    value = Column(String(100))
-    unit = Column(String(50))
-    normal_range: Optional[dict]
-    description: str
+    def __init__(self, min=0.0, max=0.0):
+        self.min = min
+        self.max = max
+
+class Biomarker:
+    __tablename__ = "biomarker"
+    def __init__(self, id, name, value, unit, normal_range, description):
+        self.id = id
+        self.name = name
+        self.value = value
+        self.unit = unit
+        self.normal_range = NormalRange(**normal_range)
+        self.description = description

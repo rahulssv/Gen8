@@ -14,7 +14,7 @@ def extract_biomarkers_from_articles(articles, query):
 
     model = GenerativeModel('gemini-2.0-flash')
     response = model.generate_content(
-        prompt + "Return only valid JSON. Format as a list of dictionaries: "
+        prompt + "Return only valid JSON. Format as a list of dictionaries: Please include normal ranges stricly and its min and max value correctly"
         "[{'id': str, 'name': str, 'value': str, 'unit': str, 'normal_range': {'min': float, 'max': float}, 'description': str}]."
     )
 
@@ -23,19 +23,6 @@ def extract_biomarkers_from_articles(articles, query):
     # return response.text
     try:
         biomarkers_data = response.text.strip().strip("```json").strip("```")
-        
-
-    #     # Ensure normal_range and unit fields are present, add random range if missing
-    #     biomarkers = []
-    #     for biomarker_data in biomarkers_data:
-    #         if 'normal_range' not in biomarker_data or not isinstance(biomarker_data['normal_range'], dict):
-    #             biomarker_data['normal_range'] = {'min': round(random.uniform(0.1, 1.0), 2), 'max': round(random.uniform(1.1, 2.0), 2)}
-    #         if 'unit' not in biomarker_data:
-    #             biomarker_data['unit'] = "mg/dL"  # Default unit, change if needed
-
-    #         biomarker = Biomarker(**biomarker_data)
-    #         biomarkers.append(biomarker)
-
         return biomarkers_data
 
     except json.JSONDecodeError as e:

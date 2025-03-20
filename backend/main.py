@@ -13,7 +13,8 @@ import json
 import google.generativeai as genai
 from biomarker_extraction import extract_biomarkers_from_articles, get_articles_from_db
 from models import Base, Article, Entity, Relation, StatisticalData , Biomarker # Import models from models.py
-
+from fastapi.encoders import jsonable_encoder
+from fastapi.responses import JSONResponse
 # Load environment variables
 load_dotenv()
 
@@ -241,18 +242,27 @@ def generate_best_articles_json(best_pmids, full_details):
 
 def generate_biomarkers_json(biomarkers_data):
     print("[DEBUG] Saving biomarkers...")
-    biomarkers = []
-    for biomarker_data in biomarkers_data:
-        biomarker = Biomarker(
-            id=biomarker_data['id'],
-            name=biomarker_data['name'],
-            value=biomarker_data['value'],
-            unit=biomarker_data.get('unit'),
-            normal_range=biomarker_data.get('normal_range'),
-            description=biomarker_data['description']
-        )
-        biomarkers.append(biomarker)
-    return biomarkers
+    print("[DEBUG] Type of biomarkers_data:", type(biomarkers_data))
+    
+    # Convert the JSON string to a Python dictionary
+    if isinstance(biomarkers_data, str):
+        biomarkers_data = json.loads(biomarkers_data)
+    
+    print("[DEBUG] Type of biomarkers_data after conversion:", type(biomarkers_data))
+    
+    bm = []
+    for biomarker in biomarkers_data:
+        normal_range = biomarker.get('normal_range', {'min': 0.0, 'max': 0.0})
+        bm.append(Biomarker(
+            id=biomarker.get('id', '0'),
+            name=biomarker.get('name', 'Unknown Biomarker'),
+            value=biomarker.get('value', '0.0'),
+            unit=biomarker.get('unit', 'Unknown Unit'),
+            normal_range=normal_range,
+            description=biomarker.get('description', 'No description available')
+        ))
+        # Process each biomarker as needed
+    return bm
 
 @app.post("/search")
 def handle_search(search_query: SearchQuery, db: Session = Depends(get_db)):
@@ -333,9 +343,9 @@ def get_biomarkers(query: str, db: Session = Depends(get_db)):
     articles = get_articles_from_db(db)
     biomarkers = extract_biomarkers_from_articles(articles, query)
     print("[DEBUG] Biomarkers to be returned:")
-    generate_biomarkers_json(biomarkers)
+    biomarkers_json = generate_biomarkers_json(biomarkers)
     print(biomarkers)
-    return biomarkers
+    return biomarkers_json
 
 if __name__ == '__main__':
     import uvicorn
