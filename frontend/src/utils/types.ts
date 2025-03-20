@@ -115,3 +115,15 @@ export interface BiomarkerInfo {
   testMethods: string[];
   references: string[];
 }
+
+export interface Biomarker{
+  id: string,
+  name: string,
+  value: number,
+  unit: string,
+  normal_range: {
+    min: number,
+    max: number
+  },
+  description: string
+}

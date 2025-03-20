@@ -1,12 +1,12 @@
 
 import { Article, QueryResult, ExtractionResult } from './types';
-import qa from '../../../backend/json/QA.json'
-import statistics from '../../../backend/json/Statistics.json'
-import articles from '../../../backend/json/Articles.json'
-import entities from '../../../backend/json/Entities.json'
-import relations from '../../../backend/json/Relations.json'
+import qa from '../../../backend/json/AIQuestion.json'
+import statistics from '../../../backend/json/StatisticalData.json'
+import articles from '../../../backend/json/Article.json'
+import entities from '../../../backend/json/Entity.json'
+import relations from '../../../backend/json/Relation.json'
 import summary from '../../../backend/json/Summary.json'
-import coexistingDatas from '../../../backend/json/CoexistingData.json'
+import coexistingDatas from '../../../backend/json/CoexistingBiomarker.json'
 // Mock API key storage - in a real app, this would be handled more securely
 let storedApiKey: string | null = null;
 

@@ -12,52 +12,14 @@ import QASection from '@/components/QASection';
 import ChatbotPanel from '@/components/ChatbotPanel';
 import { searchArticles } from '@/utils/api';
 import { Button } from '@/components/ui/button';
-import { Article, QueryResult } from '@/utils/types';
+import { Article, QueryResult,  Drug, ClinicalTrial, DiseaseAssociation, CoexistingBiomarker} from '@/utils/types';
 import { Loader2, ArrowLeft, MessageSquare } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import drugsDataJson from '../../../backend/json/DrugsData.json';
-import trialsDataJson from '../../../backend/json/TrialsData.json';
-import diseaseDataJson from '../../../backend/json/DisseaseData.json';
-import coexistingDataJson from '../../../backend/json/CoexistingData.json';
-
-// Define types for the imported JSON data
-interface Drug {
-  name: string;
-  type: string;
-  mechanism: string;
-  efficacy: string;
-  approvalStatus: string;
-  url?: string;
-}
-
-interface ClinicalTrial {
-  id: string;
-  title: string;
-  phase: string;
-  status: string;
-  locations: string[];
-  startDate: string;
-  primaryCompletion?: string;
-  interventions: string[];
-  url: string;
-}
-
-interface DiseaseAssociation {
-  disease: string;
-  relationship: string;
-  strength: 'Strong' | 'Moderate' | 'Weak';
-  evidence: string;
-  notes?: string;
-}
-
-interface CoexistingBiomarker {
-  name: string;
-  type: string;
-  effect: 'Synergistic' | 'Antagonistic' | 'No effect' | 'Variable';
-  clinicalImplication: string;
-  frequencyOfCooccurrence?: string;
-}
+import drugsDataJson from '../../../backend/json/Drug.json';
+import trialsDataJson from '../../../backend/json/ClinicalTrial.json';
+import diseaseDataJson from '../../../backend/json/DiseaseAssociation.json';
+import coexistingDataJson from '../../../backend/json/CoexistingBiomarker.json';
 
 const Results = () => {
   const location = useLocation();
@@ -68,7 +30,6 @@ const Results = () => {
   const [selectedArticles, setSelectedArticles] = useState<string[]>([]);
   const [chatbotOpen, setChatbotOpen] = useState(false);
 
-  // Initialize state with typed JSON data
   const [drugsData] = useState<Drug[]>(drugsDataJson);
   const [trialsData] = useState<ClinicalTrial[]>(trialsDataJson);
   const [diseaseData] = useState<DiseaseAssociation[]>(diseaseDataJson);
