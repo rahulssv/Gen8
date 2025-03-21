@@ -4,6 +4,8 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
 from typing import Optional, Dict
+from pydantic import BaseModel
+from typing import List, Optional
 
 Base = declarative_base()
 
@@ -106,3 +108,12 @@ class Disease:
             "evidence": self.evidence,
             "notes": self.notes
         }
+
+class ArticleDetails(BaseModel):
+    pmid: str
+    title: str
+    abstract: Optional[str]
+    keywords: Optional[List[str]]
+    summary: Optional[str]
+    qna_pairs: Optional[List[dict]]
+    message: Optional[str]
