@@ -69,3 +69,15 @@ class Biomarker:
         self.unit = unit
         self.normal_range = NormalRange(**normal_range)
         self.description = description
+
+
+class Drug(Base):
+    __tablename__ = 'drugs'
+    
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, index=True)
+    type = Column(String)
+    mechanism = Column(String)
+    efficacy = Column(String)
+    approval_status = Column(String)
+    url = Column(String)

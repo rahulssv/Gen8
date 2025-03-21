@@ -12,9 +12,11 @@ import re
 import json
 import google.generativeai as genai
 from biomarker_extraction import extract_biomarkers_from_articles, get_articles_from_db
-from models import Base, Article, Entity, Relation, StatisticalData , Biomarker # Import models from models.py
+from models import Base, Article, Entity, Relation, StatisticalData , Biomarker, Drug # Import models from models.py
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
+from drug_extraction import extract_drugs_from_articles
+
 # Load environment variables
 load_dotenv()
 
@@ -346,6 +348,20 @@ def get_biomarkers(query: str, db: Session = Depends(get_db)):
     biomarkers_json = generate_biomarkers_json(biomarkers)
     print(biomarkers)
     return biomarkers_json
+
+@app.get("/drugs")
+def get_drugs(query: str, db: Session = Depends(get_db)):
+    articles = get_articles_from_db(db)
+    drugs = extract_drugs_from_articles(articles, query)
+    return [{
+        'name': drug.name,
+        'type': drug.type,
+        'mechanism': drug.mechanism,
+        'efficacy': drug.efficacy,
+        'approvalStatus': drug.approval_status,
+        'url': drug.url
+    } for drug in drugs]
+
 
 if __name__ == '__main__':
     import uvicorn
