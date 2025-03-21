@@ -16,6 +16,7 @@ from models import Base, Article, Entity, Relation, StatisticalData , Biomarker,
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from drug_extraction import extract_drugs_from_articles
+from disease_extraction import extract_diseases_from_articles
 
 # Load environment variables
 load_dotenv()
@@ -399,6 +400,21 @@ def get_qna(query: str, db: Session = Depends(get_db)):
 
     # Return the generated Q&A pairs
     return qna_list
+
+
+@app.get("/disease")
+def get_diseases(query: str, db: Session = Depends(get_db)):
+    articles = get_articles_from_db(db)
+    diseases = extract_diseases_from_articles(articles, query)
+    return [{
+        'disease': disease.disease,
+        'relationship': disease.relationship,
+        'strength': disease.strength,
+        'evidence': disease.evidence,
+        'notes': disease.notes
+    } for disease in diseases]
+
+
 
 
 if __name__ == '__main__':
