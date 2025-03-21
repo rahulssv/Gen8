@@ -8,8 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { analyzeSingleArticle, generatePdfReport } from '@/utils/api';
-import { ExtractionResult } from '@/utils/types';
+import { analyzeSingleArticle, generatePdfReport } from '@/api/api';
+import { ExtractionResult } from '@/api/types';
 import { Loader2, Link, Upload, FileText, Download, CheckCircle } from 'lucide-react';
 
 const ArticleAnalyzer = () => {

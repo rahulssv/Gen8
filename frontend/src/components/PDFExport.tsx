@@ -10,8 +10,8 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Loader2, Check, Download } from 'lucide-react';
-import { QueryResult } from '@/utils/types';
-import { generatePdfReport } from '@/utils/api';
+import { QueryResult } from '@/api/types';
+import { generatePdfReport } from '@/api/api';
 
 interface PDFExportProps {
   result: QueryResult;

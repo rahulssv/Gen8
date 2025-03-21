@@ -1,5 +1,5 @@
 
-import { QueryResult } from '@/utils/types';
+import { QueryResult } from '@/api/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';

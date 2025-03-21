@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Search, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
-import { getApiKey, setApiKey } from '@/utils/api';
+import { getApiKey, setApiKey } from '@/api/api';
 
 interface SearchBarProps {
   size?: 'default' | 'large';

@@ -415,28 +415,28 @@ def get_diseases(query: str, db: Session = Depends(get_db)):
     } for disease in diseases]
 
 
-@app.get("/co_biomarkers")
-def get_co_biomarkers(query: str, db: Session = Depends(get_db)):
-    articles = get_articles_from_db(db)
-    co_biomarkers = extract_co_biomarkers_from_articles(articles, query)
-    co_biomarkers_list = json.loads(co_biomarkers)
-    return [{
-        'name': co_biomarker['name'],
-        'type': co_biomarker['type'],
-        'effect': co_biomarker['effect'],
-        'clinicalImplication': co_biomarker['clinicalImplication'],
-        'frequencyOfCooccurrence': co_biomarker['frequencyOfCooccurrence']
-    } for co_biomarker in co_biomarkers_list]
+# @app.get("/co_biomarkers")
+# def get_co_biomarkers(query: str, db: Session = Depends(get_db)):
+#     articles = get_articles_from_db(db)
+#     co_biomarkers = extract_co_biomarkers_from_articles(articles, query)
+#     co_biomarkers_list = json.loads(co_biomarkers)
+#     return [{
+#         'name': co_biomarker['name'],
+#         'type': co_biomarker['type'],
+#         'effect': co_biomarker['effect'],
+#         'clinicalImplication': co_biomarker['clinicalImplication'],
+#         'frequencyOfCooccurrence': co_biomarker['frequencyOfCooccurrence']
+#     } for co_biomarker in co_biomarkers_list]
 
-@app.get("/co-biomarkers")
-def get_co_biomarkers(query: str, db: Session = Depends(get_db)):
-    articles = get_articles_from_db(db)
-    if not articles:
-        raise HTTPException(status_code=404, detail="No articles found")
+# @app.get("/co-biomarkers")
+# def get_co_biomarkers(query: str, db: Session = Depends(get_db)):
+#     articles = get_articles_from_db(db)
+#     if not articles:
+#         raise HTTPException(status_code=404, detail="No articles found")
     
-    # print(articles)
-    co_biomarkers = extract_co_biomarkers_from_articles(articles, query)
-    return co_biomarkers
+#     # print(articles)
+#     co_biomarkers = extract_co_biomarkers_from_articles(articles, query)
+#     return co_biomarkers
     
 if __name__ == '__main__':
     import uvicorn

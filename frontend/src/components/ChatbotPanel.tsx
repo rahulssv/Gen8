@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Bot, User, SendIcon, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { QueryResult } from '@/utils/types';
+import { QueryResult } from '@/api/types';
 
 interface Message {
   id: string;

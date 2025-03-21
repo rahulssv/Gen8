@@ -1,7 +1,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { QueryResult, StatisticalData } from '@/utils/types';
+import { QueryResult, StatisticalData } from '@/api/types';
 import { 
   BarChart, 
   Bar, 

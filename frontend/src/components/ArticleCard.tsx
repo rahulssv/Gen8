@@ -1,5 +1,5 @@
 
-import { Article } from '@/utils/types';
+import { Article } from '@/api/types';
 import { FileText } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
