@@ -20,8 +20,7 @@ def extract_co_biomarkers_from_articles(articles, query):
     response = model.generate_content(prompt)
     
     print("[DEBUG] Response from Generative AI model for co mutations & biomarkers:")
-    print(articles)
-    
+    print(response.text)
     co_biomarkers = []
     try:
         data = json.loads(response.text.strip().strip("```json").strip("```"))
