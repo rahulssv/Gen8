@@ -81,3 +81,9 @@ class Drug(Base):
     efficacy = Column(String)
     approval_status = Column(String)
     url = Column(String)
+
+class AIQuestions(Base):
+    __tablename__ = 'AI_questions'
+    id = Column(Integer, primary_key=True)
+    question = Column(String(50))
+    answer = Column(String(100))

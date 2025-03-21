@@ -266,6 +266,33 @@ def generate_biomarkers_json(biomarkers_data):
         # Process each biomarker as needed
     return bm
 
+def generate_qna_from_articles(articles, query):
+    prompt = f"Generate concise Q&A pairs based on the following query: {query}\n\n"
+    for article in articles:
+        prompt += f"Title: {article['title']}\nAbstract: {article['abstract']}\n\n"
+
+    print("[DEBUG] Generated prompt for Q&A generation:")
+    print(prompt)
+
+    model = genai.GenerativeModel('gemini-2.0-flash')
+    response = model.generate_content(
+        prompt + "Return only valid JSON. Format as a list of dictionaries: "
+        "[{'question': str, 'answer': str}]."
+    )
+
+    print("[DEBUG] Response from Generative AI model:")
+    try:
+        qna_data = response.text.strip().strip("```json").strip("```")
+        return json.loads(qna_data)
+    except json.JSONDecodeError as e:
+        print(f"[ERROR] Invalid JSON from model: {str(e)}")
+        print("[DEBUG] Response text was not valid JSON:")
+        print(response.text)
+        return []
+    except Exception as e:
+        print(f"[ERROR] Unexpected error: {str(e)}")
+        return []
+
 @app.post("/search")
 def handle_search(search_query: SearchQuery, db: Session = Depends(get_db)):
     query = search_query.query
@@ -361,6 +388,17 @@ def get_drugs(query: str, db: Session = Depends(get_db)):
         'approvalStatus': drug.approval_status,
         'url': drug.url
     } for drug in drugs]
+
+@app.get("/getqna")
+def get_qna(query: str, db: Session = Depends(get_db)):
+    # Fetch articles from the database
+    articles = get_articles_from_db(db)
+
+    # Generate Q&A pairs using the helper function
+    qna_list = generate_qna_from_articles(articles, query)
+
+    # Return the generated Q&A pairs
+    return qna_list
 
 
 if __name__ == '__main__':
