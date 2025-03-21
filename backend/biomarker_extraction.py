@@ -14,9 +14,16 @@ def extract_biomarkers_from_articles(articles, query):
 
     model = GenerativeModel('gemini-2.0-flash')
     response = model.generate_content(
-        prompt + "Return only valid JSON. Format as a list of dictionaries: Please include normal ranges stricly and its min and max value correctly"
-        "[{'id': str, 'name': str, 'value': str, 'unit': str, 'normal_range': {'min': float, 'max': float}, 'description': str}]."
-    )
+    prompt 
+    + " Return only valid JSON. Format as a list of dictionaries: "
+    + "[{'id': str, 'name': str, 'value': str, 'unit': str, 'normal_range': {'min': float, 'max': float}, 'description': str}]."
+    + " Please include normal ranges strictly and set the min and max values correctly."
+    + " Please input 'value' as the int value from noraml range value it should be a normal value"
+    + " Example reference: "
+    + '{"id": "ldl", "name": "LDL Cholesterol", "value": 100, "unit": "mg/dL", "normal_range": {"min": 0, "max": 100}, "description": "Low-density lipoprotein, often called \'bad\' cholesterol."}'
+    + 'please dont put null in value field put any range between normal value'
+    
+)
 
     print("[DEBUG] Response from Generative AI model:")
     # print(response.text)
