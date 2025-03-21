@@ -87,3 +87,22 @@ class AIQuestions(Base):
     id = Column(Integer, primary_key=True)
     question = Column(String(50))
     answer = Column(String(100))
+
+
+# filepath: /workspaces/Gen8/backend/models.py
+class Disease:
+    def __init__(self, disease, relationship, strength, evidence, notes):
+        self.disease = disease
+        self.relationship = relationship
+        self.strength = strength
+        self.evidence = evidence
+        self.notes = notes
+
+    def to_dict(self):
+        return {
+            "disease": self.disease,
+            "relationship": self.relationship,
+            "strength": self.strength,
+            "evidence": self.evidence,
+            "notes": self.notes
+        }
