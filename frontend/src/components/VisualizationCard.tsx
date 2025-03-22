@@ -1,7 +1,10 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { QueryResult, StatisticalData } from '@/api/types';
+import { useState, useEffect } from 'react';
+import { QueryResult, StatisticalData, Entity } from '@/api/types';
+import axios from 'axios';
+import { API_BASE_URL } from '@/api/config';
 import { 
   BarChart, 
   Bar, 
@@ -21,12 +24,30 @@ interface VisualizationCardProps {
 
 const VisualizationCard = ({ result }: VisualizationCardProps) => {
   // Format data for the pie chart (entity distribution)
-  const entityData = result.entities.map(entity => ({
+  const [keyEntities, setKeyEntities] = useState<Entity[]>([]);
+  const [loadingStates, setLoadingStates] = useState({
+    entities: true
+  });
+  const entityData = keyEntities.map(entity => ({
     name: entity.name,
     value: entity.mentions,
     type: entity.type
   }));
-
+  useEffect(() => {
+    const queryParam = localStorage.getItem('query');
+    if (result) {
+      // Create a new loading state object
+      const newLoadingStates = {
+        entities: !keyEntities || keyEntities.length === 0
+      };
+      const fetchData = async () => {
+        const keyEResponse = await axios.get(`${API_BASE_URL}/key_entities?query=` + queryParam);
+        setKeyEntities(keyEResponse.data);
+      }
+      fetchData();
+      setLoadingStates(newLoadingStates);
+    }
+  }, [result]);
   // Format data for the bar chart (statistical data)
   const statData = result.statistics
     .filter(stat => stat.type === 'survival rate' || stat.type === 'efficacy')

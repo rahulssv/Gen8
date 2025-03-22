@@ -1,11 +1,12 @@
 import os
 import json
 import google.generativeai as genai
- 
+
+
 def extract_key_findings_from_articles(articles, query):
     """
     Extract key statistical findings from articles related to a specific query,
-    focusing on specific categories: survival at 15/10 months, efficacy, 
+    focusing on specific categories: survival at 15/10 months, efficacy,
     significant findings, and hazard ratios.
     Args:
         articles (list): List of article dictionaries
@@ -24,14 +25,14 @@ def extract_key_findings_from_articles(articles, query):
     5. Hazard ratio findings (e.g., "Hazard ratio for death was 0.65 (95% CI: 0.52-0.80) favoring the experimental treatment")
     Articles:
     """
- 
+
     for article in articles:
         prompt += f"""
-        {article['title']}\nAbstract: {article['abstract']}
+        {article["title"]}\nAbstract: {article["abstract"]}
         """
- 
+
     prompt += """
-    Format your response as a JSON array with the following structure:
+    Format your response as a JSON array with the following structure and make sure all category titles are unquie and atleast 5 Categories are return:
     [
       {
         "category": "survival_15_months",
@@ -59,25 +60,27 @@ def extract_key_findings_from_articles(articles, query):
         "sourceArticleId": "12345678"
       }
     ]
-Only include findings with clear statistical significance. Make each finding concise but complete.
+    
+    Only include findings with clear statistical significance. Make each finding unquie and concise but complete.
+    Dont repeat any findings and aslo categories should be unquie
     If a specific category is not mentioned in the articles, don't include it in the results.
     Return valid JSON only.
     """
- 
+
     # Generate content using Gemini model
-    model = genai.GenerativeModel('gemini-2.0-flash')
+    model = genai.GenerativeModel("gemini-2.0-flash")
     response = model.generate_content(prompt)
- 
+
     try:
         # Extract JSON from response
         response_text = response.text.strip()
- 
+
         # Handle potential markdown code blocks in the response
         if response_text.startswith("```json"):
             response_text = response_text.strip("```json").strip()
         elif response_text.startswith("```"):
             response_text = response_text.strip("```").strip()
- 
+
         # Parse the JSON
         findings = json.loads(response_text)
         return findings

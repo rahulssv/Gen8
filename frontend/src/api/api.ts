@@ -31,14 +31,14 @@ export const searchArticles = async (query: string): Promise<QueryResult> => {
   await new Promise(resolve => setTimeout(resolve, 2000));
 
   try {
-    
+    const queryParam = localStorage.getItem('query');
     const [searchRes, articlesRes, entitiesRes, statisticsRes, summaryRes, questionsRes] = await Promise.all([
-      httpClient.request<"">('/search', { method: 'POST', body: { "query" : query } }),
-      httpClient.request<Article[]>('/articles', { queryParams: { query } }).catch(() => articles),
-      httpClient.request<any[]>('/entities', { queryParams: { query } }).catch(() => entities),
+      httpClient.request<"">('/search', { method: 'POST', body: { "query" : queryParam } }),
+      httpClient.request<Article[]>('/articles', { queryParams: { queryParam } }).catch(() => articles),
+      httpClient.request<any[]>('/entities', { queryParams: { queryParam } }).catch(() => entities),
       httpClient.request<any[]>('/statistics', { queryParams: {} }).catch(() => statistics),
-      httpClient.request<string>('/summary', { queryParams: { query } }).catch(() => generateSummary(query)),
-      httpClient.request<any[]>('/getqna', { queryParams: { query } }).catch(() => qa)
+      httpClient.request<string>('/summary', { queryParams: { queryParam } }).catch(() => generateSummary(queryParam)),
+      httpClient.request<any[]>('/getqna', { queryParams: { queryParam } }).catch(() => qa)
     ]);
 
     return {

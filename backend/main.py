@@ -188,7 +188,7 @@ def process_statistics(paper_data):
         print(f"Error processing statistics: {str(e)}")
         return []
 
-def fetch_pubmed_pmids(query, max_results=200):
+def fetch_pubmed_pmids(query, max_results=50):
     print("[DEBUG] Fetching PMIDs...")
     base_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
     params = {

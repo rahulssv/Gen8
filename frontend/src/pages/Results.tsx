@@ -33,7 +33,7 @@ const Results = () => {
   const [chatbotOpen, setChatbotOpen] = useState(false);
 
   const [drugsData, setDrugsData] = useState<Drug[]>([]);
-  const [trialsData, setTrialsData] = useState<ClinicalTrial[]>([]);
+  // const [trialsData, setTrialsData] = useState<ClinicalTrial[]>([]);
   const [diseaseData, setDiseaseData] = useState<DiseaseAssociation[]>([]);
   const [coexistingData, setCoexistingData] = useState<CoexistingBiomarker[]>([]);
 
@@ -219,7 +219,7 @@ const Results = () => {
 
                   <TabsContent value="treatments" className="space-y-6">
                     <DrugsAndTreatmentsCard drugs={drugsData} />
-                    <ClinicalTrialsCard trials={trialsData} />
+                    {/* <ClinicalTrialsCard trials={trialsData} /> */}
                   </TabsContent>
 
                   <TabsContent value="connections" className="space-y-6">

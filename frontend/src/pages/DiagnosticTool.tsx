@@ -4,8 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { TestTube, Microscope, AlertCircle, LineChart, ArrowRight } from 'lucide-react';
+import { TestTube, Microscope, AlertCircle, Loader2, LineChart, ArrowRight } from 'lucide-react'; // Added Loader2
 import { useToast } from '@/hooks/use-toast';
+// import biomarkersData from '../../../backend/json/Biomarker.json'
 import { API_BASE_URL } from '../api/config';
 import { Biomarker, DiagnosticResult } from '../api/types.ts';
 import axios from 'axios';
@@ -15,6 +16,8 @@ const DiagnosticTool = () => {
   const [diagnosisResult, setDiagnosisResult] = useState<string | null>(null);
   const [biomarkers, setBiomarkers] = useState<Biomarker[]>([]);
   const [diagnosticData, setDiagnosticData] = useState<DiagnosticResult | null>(null);
+  // Added loading state for analysis
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const handleBiomarkerChange = (id: string, newValue: number) => {
     const updatedData = biomarkers.map((item) => item.id === id ? {...item,value: newValue} : item)
@@ -47,192 +50,50 @@ const DiagnosticTool = () => {
   },[])
 
   const analyzeBiomarkers = () => {
-
+    // Set analyzing state to true
+    setIsAnalyzing(true);
     axios.post(`${API_BASE_URL}/biomarkers`, biomarkers);
+    // Use setTimeout to simulate processing time
+    setTimeout(() => {
+      const abnormalMarkers = biomarkers.filter(
+        marker => marker.value < marker.normal_range.min || marker.value > marker.normal_range.max
+      );
 
-    const abnormalMarkers = biomarkers.filter(
-      marker => marker.value < marker.normal_range.min || marker.value > marker.normal_range.max
-    );
+      let diagnosis = "";
 
-    let diagnosis = "";
-    
-    if (abnormalMarkers.length === 0) {
-      diagnosis = "All biomarkers are within normal ranges. No concerning patterns detected.";
-      
-      // Create dummy data for normal results
-      setDiagnosticData({
-        summary: diagnosis,
-        risk_level: "low",
-        abnormal_markers: [], // Ensure this matches the DiagnosticResult interface
-        potential_conditions: [],
-        lifestyle_recommendations: [
-          "Continue with regular exercise of at least 150 minutes per week",
-          "Maintain a balanced diet rich in fruits, vegetables, and whole grains",
-          "Schedule routine check-ups annually"
-        ]
-      });
-    } else {
-      const glucose = biomarkers.find(m => m.id === "glucose")!;
-      const a1c = biomarkers.find(m => m.id === "a1c")!;
-      const ldl = biomarkers.find(m => m.id === "ldl")!;
-      const hdl = biomarkers.find(m => m.id === "hdl")!;
-      const triglycerides = biomarkers.find(m => m.id === "triglycerides")!;
-      const cholesterol = biomarkers.find(m => m.id === "cholesterol")!;
-      const crp = biomarkers.find(m => m.id === "crp")!;
-      
-      let risk_level: "low" | "moderate" | "high" | "very_high" = "low";
-      let potentialConditions = [];
-      
-      if (glucose.value > 125 && a1c.value > 6.5) {
-        diagnosis = "Potential Diabetes Mellitus pattern detected. Elevated blood glucose and HbA1c suggest further evaluation for diabetes.";
-        risk_level = "high";
-        potentialConditions.push({
-          name: "Diabetes Mellitus (Type 2)",
-          probability: 85,
-          description: "A metabolic disorder characterized by high blood sugar levels over a prolonged period due to insulin resistance or insufficient insulin production.",
-          recommendations: [
-            "Schedule follow-up with endocrinologist",
-            "Consider oral glucose tolerance test",
-            "Monitor blood glucose regularly",
-            "Dietary changes to reduce simple carbohydrates"
-          ]
-        });
-      } else if (glucose.value >= 100 && glucose.value < 126 && a1c.value >= 5.7 && a1c.value < 6.5) {
-        diagnosis = "Potential Prediabetes pattern detected. Blood glucose and HbA1c values suggest increased risk for developing diabetes.";
-        risk_level = "moderate";
-        potentialConditions.push({
-          name: "Prediabetes",
-          probability: 75,
-          description: "A condition where blood sugar levels are higher than normal, but not high enough to be diagnosed as diabetes. Often a precursor to type 2 diabetes.",
-          recommendations: [
-            "Increase physical activity to 150+ minutes/week",
-            "Aim for 5-7% weight loss if overweight",
-            "Follow-up testing in 6 months",
-            "Consider meeting with dietitian" 
-          ]
-        });
-      } else if (ldl.value > 130 && cholesterol.value > 240 && triglycerides.value > 150) {
-        diagnosis = "Potential Hyperlipidemia pattern detected. Elevated LDL, total cholesterol, and triglycerides indicate increased cardiovascular risk.";
-        risk_level = "high";
-        potentialConditions.push({
-          name: "Hyperlipidemia",
-          probability: 80,
-          description: "Elevated levels of lipids (fats) in the blood, including cholesterol and triglycerides, which increase risk of cardiovascular disease.",
-          recommendations: [
-            "Consider statin therapy evaluation",
-            "Reduce saturated fat intake",
-            "Increase soluble fiber consumption",
-            "Exercise 30+ minutes daily" 
-          ]
-        });
-        
-        if (ldl.value > 160 && cholesterol.value > 280) {
-          potentialConditions.push({
-            name: "Familial Hypercholesterolemia",
-            probability: 40,
-            description: "A genetic disorder characterized by very high levels of LDL cholesterol from birth, leading to early cardiovascular disease.",
-            recommendations: [
-              "Genetic counseling and testing",
-              "Aggressive lipid-lowering therapy",
-              "Screening of first-degree relatives"
-            ]
-          });
-        }
-      } else if (crp.value > 10) {
-        diagnosis = "Significant inflammation detected. Elevated C-reactive protein may indicate infection, tissue injury, or chronic inflammatory conditions.";
-        risk_level = "high";
-        potentialConditions.push({
-          name: "Systemic Inflammation",
-          probability: 70,
-          description: "Elevated CRP indicates an inflammatory process that could be related to infection, autoimmune conditions, or tissue damage.",
-          recommendations: [
-            "Complete blood count and differential",
-            "Autoimmune disease panel",
-            "Imaging studies as appropriate",
-            "Anti-inflammatory dietary changes"
-          ]
-        });
+      if (abnormalMarkers.length === 0) {
+        diagnosis = "All biomarkers are within normal ranges. No concerning patterns detected.";
       } else {
-        diagnosis = `The following biomarkers are outside normal ranges: ${abnormalMarkers.map(m => m.name).join(", ")}. Consider consulting with a healthcare provider.`;
-        risk_level = "moderate";
-      }
-      
-      // Create abnormal markers data
-      const abnormalMarkersData = abnormalMarkers.map(marker => {
-        const isAbove = marker.value > marker.normal_range.max;
-        const referenceValue = isAbove ? marker.normal_range.max : marker.normal_range.min;
-        const deviationPercentage = Math.abs(((marker.value - referenceValue) / referenceValue) * 100).toFixed(1);
-        
-        return {
-          id: marker.id,
-          name: marker.name,
-          value: marker.value,
-          unit: marker.unit,
-          deviation: isAbove ? "above" : "below",
-          deviation_percentage: parseFloat(deviationPercentage)
-        };
-      });
-      
-      // Create lifestyle recommendations based on abnormal markers
-      const lifestyleRecommendations = [];
-      
-      if (glucose.value > glucose.normal_range.max || a1c.value > a1c.normal_range.max) {
-        lifestyleRecommendations.push(
-          "Limit refined carbohydrates and added sugars",
-          "Include protein with every meal to stabilize blood sugar",
-          "Consider intermittent fasting under medical supervision"
-        );
-      }
-      
-      if (ldl.value > ldl.normal_range.max || cholesterol.value > cholesterol.normal_range.max) {
-        lifestyleRecommendations.push(
-          "Increase consumption of omega-3 fatty acids through fatty fish",
-          "Add plant sterols and stanols to diet",
-          "Limit consumption of trans fats and saturated fats"
-        );
-      }
-      
-      if (hdl.value < hdl.normal_range.min) {
-        lifestyleRecommendations.push(
-          "Increase aerobic exercise to 30+ minutes 5x weekly",
-          "Consider adding moderate alcohol consumption if appropriate",
-          "Quit smoking if applicable"
-        );
-      }
-      
-      if (crp.value > crp.normal_range.max) {
-        lifestyleRecommendations.push(
-          "Adopt an anti-inflammatory diet rich in colorful vegetables",
-          "Consider adding turmeric, ginger, and omega-3 supplements",
-          "Prioritize stress reduction and adequate sleep"
-        );
-      }
-      
-      // If no specific recommendations, add general ones
-      if (lifestyleRecommendations.length === 0) {
-        lifestyleRecommendations.push(
-          "Maintain regular physical activity of 150+ minutes weekly",
-          "Focus on whole foods diet with emphasis on plants",
-          "Ensure adequate hydration of 2-3 liters daily",
-          "Prioritize 7-9 hours of quality sleep nightly"
-        );
-      }
-      
-      // Set the complete diagnostic data
-      setDiagnosticData({
-        summary: diagnosis,
-        risk_level: risk_level,
-        abnormal_markers: abnormalMarkersData, // Ensure this matches the DiagnosticResult interface
-        potential_conditions: potentialConditions,
-        lifestyle_recommendations: lifestyleRecommendations
-      });
-    }
+        const glucose = biomarkers.find(m => m.id === "glucose")!;
+        const a1c = biomarkers.find(m => m.id === "a1c")!;
+        const ldl = biomarkers.find(m => m.id === "ldl")!;
+        const hdl = biomarkers.find(m => m.id === "hdl")!;
+        const triglycerides = biomarkers.find(m => m.id === "triglycerides")!;
+        const cholesterol = biomarkers.find(m => m.id === "cholesterol")!;
+        const crp = biomarkers.find(m => m.id === "crp")!;
 
-    setDiagnosisResult(diagnosis);
-    toast({
-      title: "Analysis Complete",
-      description: "Your biomarker analysis has been completed.",
-    });
+        if (glucose.value > 125 && a1c.value > 6.5) {
+          diagnosis = "Potential Diabetes Mellitus pattern detected. Elevated blood glucose and HbA1c suggest further evaluation for diabetes.";
+        } else if (glucose.value >= 100 && glucose.value < 126 && a1c.value >= 5.7 && a1c.value < 6.5) {
+          diagnosis = "Potential Prediabetes pattern detected. Blood glucose and HbA1c values suggest increased risk for developing diabetes.";
+        } else if (ldl.value > 130 && cholesterol.value > 240 && triglycerides.value > 150) {
+          diagnosis = "Potential Hyperlipidemia pattern detected. Elevated LDL, total cholesterol, and triglycerides indicate increased cardiovascular risk.";
+        } else if (crp.value > 10) {
+          diagnosis = "Significant inflammation detected. Elevated C-reactive protein may indicate infection, tissue injury, or chronic inflammatory conditions.";
+        } else {
+          diagnosis = `The following biomarkers are outside normal ranges: ${abnormalMarkers.map(m => m.name).join(", ")}. Consider consulting with a healthcare provider.`;
+        }
+      }
+
+      setDiagnosisResult(diagnosis);
+      // Set analyzing state back to false
+      setIsAnalyzing(false);
+
+      toast({
+        title: "Analysis Complete",
+        description: "Your biomarker analysis has been completed.",
+      });
+    }, 1500); // 1.5 second delay to show loading state
   };
 
   return (
@@ -280,7 +141,7 @@ const DiagnosticTool = () => {
                           </Badge>
                         </div>
                       </div>
-                      <Slider 
+                      <Slider
                         id={marker.id}
                         min={marker.normal_range.min * 0.5}
                         max={marker.normal_range.max * 2}
@@ -293,12 +154,22 @@ const DiagnosticTool = () => {
                       </p>
                     </div>
                   ))}
-                  <Button 
-                    onClick={analyzeBiomarkers} 
+                  <Button
+                    onClick={analyzeBiomarkers}
                     className="w-full mt-4 bg-insight-500 hover:bg-insight-600"
+                    disabled={isAnalyzing}
                   >
-                    <TestTube className="mr-2 h-4 w-4" />
-                    Analyze Biomarkers
+                    {isAnalyzing ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Analyzing...
+                      </>
+                    ) : (
+                      <>
+                        <TestTube className="mr-2 h-4 w-4" />
+                        Analyze Biomarkers
+                      </>
+                    )}
                   </Button>
                 </div>
               </CardContent>
@@ -316,7 +187,15 @@ const DiagnosticTool = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6">
-                {diagnosisResult ? (
+                {isAnalyzing ? (
+                  // Show loading state while analyzing
+                  <div className="flex flex-col items-center justify-center h-64 text-center">
+                    <Loader2 className="h-12 w-12 text-insight-500 dark:text-insight-400 animate-spin mb-4" />
+                    <p className="text-gray-500 dark:text-gray-400">
+                      Analyzing biomarker patterns...
+                    </p>
+                  </div>
+                ) : diagnosisResult ? (
                   <div className="space-y-4">
                     <div className="p-4 rounded-lg bg-insight-50 dark:bg-insight-900/20 border border-insight-200 dark:border-insight-800">
                       <div className="flex items-start">

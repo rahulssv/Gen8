@@ -1,10 +1,9 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { FileSearch, Search, Dna } from 'lucide-react';
+import { FileSearch, Search, Dna, Loader2 } from 'lucide-react'; // Added Loader2
 import { useToast } from '@/hooks/use-toast';
 import biomarkerDatabase from '../../../backend/json/BiomarkerInfo.json';
 
@@ -13,7 +12,7 @@ const BiomarkerReference = () => {
   const [query, setQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [searchResult, setSearchResult] = useState<BiomarkerInfo | null>(null);
-  
+
   interface BiomarkerInfo {
     name: string;
     aliases: string[];
@@ -28,7 +27,7 @@ const BiomarkerReference = () => {
     testMethods: string[];
     references: string[];
   }
-  
+
   const handleSearch = () => {
     if (!query.trim()) {
       toast({
@@ -40,17 +39,17 @@ const BiomarkerReference = () => {
     }
 
     setIsLoading(true);
-    
+
     // Simulate API call with setTimeout
     setTimeout(() => {
       const normalizedQuery = query.toLowerCase().trim();
-      
+
       // Find the biomarker in our database
-      const result = Object.values(biomarkerDatabase).find(biomarker => 
+      const result = Object.values(biomarkerDatabase).find(biomarker =>
         biomarker.name.toLowerCase() === normalizedQuery ||
         biomarker.aliases.some(alias => alias.toLowerCase().includes(normalizedQuery))
       );
-      
+
       if (result) {
         setSearchResult(result);
         toast({
@@ -65,7 +64,7 @@ const BiomarkerReference = () => {
           variant: "destructive"
         });
       }
-      
+
       setIsLoading(false);
     }, 1000);
   };
@@ -102,15 +101,19 @@ const BiomarkerReference = () => {
                     placeholder="Enter biomarker name (e.g., BRAF, PSA, HbA1c)"
                     className="w-full"
                     onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                    disabled={isLoading}
                   />
                 </div>
-                <Button 
-                  onClick={handleSearch} 
+                <Button
+                  onClick={handleSearch}
                   disabled={isLoading}
                   className="bg-insight-500 hover:bg-insight-600 ml-0 sm:ml-2"
                 >
                   {isLoading ? (
-                    <>Searching...</>
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Searching...
+                    </>
                   ) : (
                     <>
                       <Search className="mr-2 h-4 w-4" />
@@ -125,9 +128,17 @@ const BiomarkerReference = () => {
             </CardContent>
           </Card>
         </div>
-
         {/* Results Section */}
-        {searchResult && (
+        {isLoading ? (
+          <Card className="shadow-sm border border-gray-200 dark:border-gray-800">
+            <CardContent className="p-6">
+              <div className="flex flex-col items-center justify-center py-12">
+                <Loader2 className="h-12 w-12 animate-spin text-insight-500 mb-4" />
+                <p className="text-gray-500 dark:text-gray-400">Searching biomarker database...</p>
+              </div>
+            </CardContent>
+          </Card>
+        ) : searchResult && (
           <Card className="shadow-sm border border-gray-200 dark:border-gray-800">
             <CardHeader className="bg-gradient-to-r from-white to-gray-50 dark:from-gray-900 dark:to-gray-900/50 border-b border-gray-100 dark:border-gray-800 pb-3">
               <Badge variant="outline" className="mb-2 bg-insight-50 text-insight-700 border-insight-200">
@@ -158,13 +169,13 @@ const BiomarkerReference = () => {
                     </div>
                   </div>
                 )}
-                
+
                 {/* Description */}
                 <div>
                   <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">Description</h3>
                   <p className="text-gray-800 dark:text-gray-200">{searchResult.description}</p>
                 </div>
-                
+
                 {/* Normal Range if available */}
                 {searchResult.normalRange && (
                   <div>
@@ -174,7 +185,7 @@ const BiomarkerReference = () => {
                     </Badge>
                   </div>
                 )}
-                
+
                 {/* Clinical Significance */}
                 <div>
                   <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">Clinical Significance</h3>
@@ -184,7 +195,7 @@ const BiomarkerReference = () => {
                     ))}
                   </ul>
                 </div>
-                
+
                 {/* Associated Diseases */}
                 <div>
                   <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">Associated Diseases</h3>
@@ -196,7 +207,7 @@ const BiomarkerReference = () => {
                     ))}
                   </div>
                 </div>
-                
+
                 {/* Test Methods */}
                 <div>
                   <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">Testing Methods</h3>
@@ -208,7 +219,7 @@ const BiomarkerReference = () => {
                     ))}
                   </div>
                 </div>
-                
+
                 {/* References */}
                 <div>
                   <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">Key References</h3>
