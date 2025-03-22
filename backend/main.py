@@ -18,6 +18,8 @@ from fastapi.responses import JSONResponse
 from drug_extraction import extract_drugs_from_articles
 from disease_extraction import extract_diseases_from_articles
 from co_biomarker_extraction import extract_co_biomarkers_from_articles
+from summary_extraction import extract_summary_from_articles
+
 # Load environment variables
 load_dotenv()
 
@@ -427,6 +429,12 @@ def get_co_biomarkers(query: str, db: Session = Depends(get_db)):
         'clinicalImplication': co_biomarker['clinicalImplication'],
         'frequencyOfCooccurrence': co_biomarker['frequencyOfCooccurrence']
     } for co_biomarker in co_biomarkers_list]
+
+@app.get("/summary")
+def get_summary(query: str, db: Session = Depends(get_db)):
+    articles = get_articles_from_db(db)
+    summary = extract_summary_from_articles(articles, query)
+    return summary
 
 @app.get("/co-biomarkers")
 def get_co_biomarkers(query: str, db: Session = Depends(get_db)):

@@ -106,3 +106,13 @@ class Disease:
             "evidence": self.evidence,
             "notes": self.notes
         }
+
+class Summary(Base):
+    __tablename__ = "summaries"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    overview = Column(Text)
+    key_findings = Column(Text)
+    clinical_implications = Column(Text)
+    research_gaps = Column(Text)
+    conclusion = Column(Text)
