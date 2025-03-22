@@ -24,6 +24,7 @@ import entities from '../../../backend/json/Entity.json';
 import relations from '../../../backend/json/Relation.json';
 import summary from '../../../backend/json/Summary.json';
 import coexistingDatas from '../../../backend/json/CoexistingBiomarker.json';
+import { stat } from 'fs';
 
 // API service functions with mock fallbacks
 export const searchArticles = async (query: string): Promise<QueryResult> => {
@@ -65,30 +66,30 @@ export const analyzeSingleArticle = async (articleUrl: string): Promise<Extracti
   await new Promise(resolve => setTimeout(resolve, 1500));
 
   try {
-    const [entitiesRes, relationsRes, statisticsRes, coexistingRes, summaryRes] = await Promise.all([
-      httpClient.request<any[]>('/entities', { queryParams: { url: articleUrl } }).catch(() => entities),
-      httpClient.request<any[]>('/relations', { queryParams: { url: articleUrl } }).catch(() => relations),
-      httpClient.request<StatisticalData>('/statistics', { queryParams: { url: articleUrl } }).catch(() => statistics),
-      httpClient.request<string[]>('/co_biomarkers', { queryParams: { url: articleUrl } })
-        .catch(() => coexistingDatas.map(codata => codata.name)),
-      httpClient.request<string>('/summary', { queryParams: { url: articleUrl } }).catch(() => summary)
-    ]);
+    console.log("ARTICLE URL", articleUrl);
+    
+    // Make a GET request to the /process-article endpoint with the article URL as a query parameter
+    const response = await httpClient.request<any>('/process-article?url', {
+      method: 'GET',
+      queryParams: { url: articleUrl.toString() },
+    });
 
+    // Extract only the required fields from the response
+    const { title,summary, keywords, qna_pairs } = response;
+    console.log("RESPONSE", response);
+    console.log("Extracted Data:", { title, summary , keywords, qna_pairs });
+    
+    // Return the extracted data in the desired format
     return {
-      entities: entitiesRes,
-      relations: relationsRes,
-      statistics: statisticsRes,
-      coexistingFactors: coexistingRes,
-      summary: summaryRes
+       title,
+       summary,
+       keywords,
+       aiGeneratedQuestions: qna_pairs, // Map qnaPairs to aiGeneratedQuestions
     };
+    //return(response);
   } catch (error) {
-    return {
-      entities: generateEntities(""),
-      relations: generateRelations(),
-      statistics: generateStatistics(),
-      coexistingFactors: coexistingDatas.map((codata)=>codata.name),
-      summary: summary
-    };
+    console.error('Error fetching article data:', error);
+    throw new Error('Failed to analyze the article. Please try again.');
   }
 };
 

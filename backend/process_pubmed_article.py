@@ -42,13 +42,24 @@ def process_pubmed_article(url: str) -> ArticleDetails:
             message=f"Error fetching article: {str(e)}"
         )
 
-    # Extract title and abstract
+    # # Extract title and abstract
+    # title = "Title not available"
+    # abstract = "Abstract not available"
+    # if article_text:
+    #     lines = article_text.split("\n")
+    #     title = lines[0] if lines else title
+    #     abstract = "\n".join(lines[1:]) if len(lines) > 1 else abstract
+
+   # Extract title and abstract
     title = "Title not available"
     abstract = "Abstract not available"
     if article_text:
-        lines = article_text.split("\n")
-        title = lines[0] if lines else title
-        abstract = "\n".join(lines[1:]) if len(lines) > 1 else abstract
+        lines = [line.strip() for line in article_text.split("\n") if line.strip()]  # Remove empty lines
+        if len(lines) > 1:  # Ensure there are at least two non-empty lines
+            title = lines[2]  # Take the second non-empty line as the title
+            #abstract = "\n".join(lines[2:]).strip()  # Remaining lines are the abstract
+        elif len(lines) == 1:  # If only one non-empty line exists
+            abstract = lines[0]  # Treat it as the abstract
 
     # Generate AI-based insights using Gemini
     try:
