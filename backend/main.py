@@ -581,9 +581,7 @@ def get_key_findings(query: str, db: Session = Depends(get_db)):
    
     key_findings = extract_key_findings_from_articles(articles, query)
     return key_findings
- 
 
- 
 @app.get("/key_entities")
 def get_key_entities(query: str, db: Session = Depends(get_db)):
     """

@@ -5,7 +5,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
 import PDFExport from './PDFExport';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
+import { API_BASE_URL } from '@/api/config';
 
 interface SummaryCardProps {
   result: QueryResult;
@@ -13,7 +15,21 @@ interface SummaryCardProps {
 
 const SummaryCard = ({ result }: SummaryCardProps) => {
   const [showPdfExport, setShowPdfExport] = useState(false);
+  const[resultSet,setResultSet] = useState({});
+  const[keyFinindings,setKeyFindings] = useState([]);
+  const[keyEntities,setKeyEntities] = useState([{}]);
 
+  useEffect(()=> {
+    const fetchData = async () => {
+      const response = await axios.get(`${API_BASE_URL}/summary?query=""`);
+      const keyFResponse = await axios.get(`${API_BASE_URL}/key_findings?query=""`);
+      const keyEResponse = await axios.get(`${API_BASE_URL}/key_entities?query=""`);
+      setResultSet(response.data);
+      setKeyFindings(keyFResponse.data);
+      setKeyEntities(keyEResponse.data);
+    }
+    fetchData();
+  },[]);
   return (
     <Card className="shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden transition-all duration-300">
       <CardHeader className="bg-gradient-to-r from-white to-gray-50 dark:from-gray-900 dark:to-gray-900/50 border-b border-gray-100 dark:border-gray-800 pb-3">
@@ -44,7 +60,7 @@ const SummaryCard = ({ result }: SummaryCardProps) => {
               Summary of Evidence
             </h3>
             <p className="text-gray-800 dark:text-gray-200 leading-relaxed">
-              {result.summary}
+              {resultSet?.overview}
             </p>
           </div>
           
@@ -53,15 +69,10 @@ const SummaryCard = ({ result }: SummaryCardProps) => {
               Key Findings
             </h3>
             <ul className="list-disc pl-5 space-y-1 text-gray-800 dark:text-gray-200">
-              {result.statistics.map((stat, index) => (
+              {keyFinindings.map((stat, index) => (
                 <li key={index} className="leading-relaxed">
-                  <span className="font-medium">{stat.type === 'survival rate' ? 'Survival: ' : 
-                                                 stat.type === 'efficacy' ? 'Efficacy: ' : 
-                                                 stat.type === 'p-value' ? 'Significance: ' : 
-                                                 stat.type === 'hazard ratio' ? 'Hazard Ratio: ' : 
-                                                 'Result: '}</span>
-                  {stat.value}{stat.unit ? ` ${stat.unit}` : ''} 
-                  <span className="text-gray-600 dark:text-gray-400 text-sm"> ({stat.context})</span>
+                  <span className="font-medium">{stat.category}</span>
+                  <span className="text-gray-600 dark:text-gray-400 text-sm"> ({stat.finding})</span>
                 </li>
               ))}
             </ul>
@@ -72,7 +83,7 @@ const SummaryCard = ({ result }: SummaryCardProps) => {
               Key Entities Identified
             </h3>
             <div className="flex flex-wrap gap-2">
-              {result.entities.map((entity, index) => (
+              {keyEntities.map((entity, index) => (
                 <Badge 
                   key={index} 
                   className={
@@ -102,4 +113,4 @@ const SummaryCard = ({ result }: SummaryCardProps) => {
   );
 };
 
-export default SummaryCard;
+export default SummaryCard; 

@@ -12,10 +12,12 @@ import QASection from '@/components/QASection';
 import ChatbotPanel from '@/components/ChatbotPanel';
 import { searchArticles } from '@/api/api';
 import { Button } from '@/components/ui/button';
-import { Article, QueryResult,  Drug, ClinicalTrial, DiseaseAssociation, CoexistingBiomarker} from '@/api/types';
+import { Article, QueryResult, Drug, ClinicalTrial, DiseaseAssociation, CoexistingBiomarker } from '@/api/types';
 import { Loader2, ArrowLeft, MessageSquare } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import axios from 'axios';
+import { API_BASE_URL } from '../api/config';
 import drugsDataJson from '../../../backend/json/Drug.json';
 import trialsDataJson from '../../../backend/json/ClinicalTrial.json';
 import diseaseDataJson from '../../../backend/json/DiseaseAssociation.json';
@@ -30,13 +32,13 @@ const Results = () => {
   const [selectedArticles, setSelectedArticles] = useState<string[]>([]);
   const [chatbotOpen, setChatbotOpen] = useState(false);
 
-  const [drugsData] = useState<Drug[]>(drugsDataJson);
-  const [trialsData] = useState<ClinicalTrial[]>(trialsDataJson);
-  const [diseaseData] = useState<DiseaseAssociation[]>(diseaseDataJson);
-  const [coexistingData] = useState<CoexistingBiomarker[]>(coexistingDataJson);
+  const [drugsData, setDrugsData] = useState<Drug[]>([]);
+  const [trialsData, setTrialsData] = useState<ClinicalTrial[]>([]);
+  const [diseaseData, setDiseaseData] = useState<DiseaseAssociation[]>([]);
+  const [coexistingData, setCoexistingData] = useState<CoexistingBiomarker[]>([]);
 
   const query = new URLSearchParams(location.search).get('q') || '';
-  localStorage.setItem('query',query);
+  localStorage.setItem('query', query);
 
   const fetchResults = async (searchQuery: string) => {
     if (!searchQuery) {
@@ -48,9 +50,55 @@ const Results = () => {
     setError(null);
 
     try {
+      const queryParam = localStorage.getItem('query');
       const data = await searchArticles(searchQuery);
       setResult(data);
       setSelectedArticles(data.articles.map(article => article.id));
+      const drugDataResponse = await axios.get(`${API_BASE_URL}/drugs?query=` + queryParam);
+      const drugData: Drug[] = drugDataResponse.data.map((item: any) => ({
+        name: item?.name,
+        type: item?.type,
+        mechanism: item?.mechanism,
+        efficacy: item?.efficacy,
+        approvalStatus: item?.approvalStatus,
+        url: item?.url,
+      })
+      )
+      setDrugsData(drugData);
+
+      //   const trialDataResponse = await axios.get(`${API_BASE_URL}/drugs?query=` + queryParam);
+      //   const trialData : ClinicalTrial[] = trialDataResponse.data.map((item: any) => ({
+      //     name: item?.name,
+      //     type: item?.type,
+      //     mechanism: item?.mechanism,
+      //     efficacy: item?.efficacy,
+      //     approvalStatus: item?.approvalStatus,
+      //     url: item?.url,
+      //   })
+      // )
+      //   setTrialsData(trialData);
+
+      const diseasesDataResponse = await axios.get(`${API_BASE_URL}/disease?query=` + queryParam);
+      const diseasesData: DiseaseAssociation[] = diseasesDataResponse.data.map((item: any) => ({
+        disease: item?.disease,
+        relationship: item?.relationship,
+        strength: item?.strength,
+        evidence: item?.evidence,
+        notes: item?.notes
+      })
+      )
+      setDiseaseData(diseasesData);
+
+      const coexistingDatasResponse = await axios.get(`${API_BASE_URL}/co-biomarkers?query=` + queryParam);
+      const coexistingDatas: CoexistingBiomarker[] = coexistingDatasResponse.data.map((item: any) => ({
+        name: item?.name,
+        type: item?.type,
+        effect: item?.effect,
+        clinicalImplication: item?.clinicalImplication,
+        frequencyOfCooccurrence: item?.frequencyOfCooccurrence
+      })
+      )
+      setCoexistingData(coexistingDatas);
     } catch (err) {
       console.error('Error fetching results:', err);
       setError('Failed to fetch results. Please try again.');
@@ -59,12 +107,13 @@ const Results = () => {
     }
   };
 
+
   useEffect(() => {
     fetchResults(query);
   }, [query]);
 
   const toggleArticleSelection = (articleId: string) => {
-    setSelectedArticles(prev => 
+    setSelectedArticles(prev =>
       prev.includes(articleId)
         ? prev.filter(id => id !== articleId)
         : [...prev, articleId]
@@ -142,7 +191,7 @@ const Results = () => {
                     </Badge>
                   </div>
                 </div>
-                
+
                 <div className="space-y-4">
                   {result.articles.map((article) => (
                     <ArticleCard
@@ -162,17 +211,17 @@ const Results = () => {
                     <TabsTrigger value="treatments" className="flex-1">Treatments</TabsTrigger>
                     <TabsTrigger value="connections" className="flex-1">Connections</TabsTrigger>
                   </TabsList>
-                  
+
                   <TabsContent value="summary" className="space-y-6">
                     <SummaryCard result={result} />
                     <QASection questions={result.aiGeneratedQuestions} />
                   </TabsContent>
-                  
+
                   <TabsContent value="treatments" className="space-y-6">
                     <DrugsAndTreatmentsCard drugs={drugsData} />
                     <ClinicalTrialsCard trials={trialsData} />
                   </TabsContent>
-                  
+
                   <TabsContent value="connections" className="space-y-6">
                     <DiseaseAssociationsCard associations={diseaseData} />
                     <CoexistingBiomarkersCard biomarkers={coexistingData} />
@@ -184,9 +233,9 @@ const Results = () => {
           </div>
         ) : null}
       </div>
-      
+
       {result && chatbotOpen && (
-        <ChatbotPanel 
+        <ChatbotPanel
           result={result}
           isOpen={chatbotOpen}
           onClose={() => setChatbotOpen(false)}

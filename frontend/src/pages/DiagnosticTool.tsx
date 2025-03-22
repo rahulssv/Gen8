@@ -6,40 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { TestTube, Microscope, AlertCircle, LineChart, ArrowRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import biomarkersData from '../../../backend/json/Biomarker.json'
+import { API_BASE_URL } from '../api/config';
+import { Biomarker, DiagnosticResult } from '../api/types.ts';
 import axios from 'axios';
-
-interface Biomarker {
-  id: string;
-  name: string;
-  value: number;
-  unit: string;
-  normal_range: {
-    min: number;
-    max: number;
-  };
-  description: string;
-}
-
-interface DiagnosticResult {
-  summary: string;
-  risk_level: "low" | "moderate" | "high" | "very_high";
-  abnormal_markers: {
-    id: string;
-    name: string;
-    value: number;
-    unit: string;
-    deviation: "above" | "below";
-    deviation_percentage: number;
-  }[];
-  potential_conditions: {
-    name: string;
-    probability: number;
-    description: string;
-    recommendations: string[];
-  }[];
-  lifestyle_recommendations: string[];
-}
 
 const DiagnosticTool = () => {
   const { toast } = useToast();
@@ -55,10 +24,9 @@ const DiagnosticTool = () => {
       marker.id === id ? { ...marker, value: newValue[0] } : marker
     ));
   };
-  https://super-duper-space-giggle-5j959q4j4pjc4gp6-8000.app.github.dev/
   useEffect(()=>{
     const queryParam = localStorage.getItem('query');
-    const httpUrl = `https://super-duper-space-giggle-5j959q4j4pjc4gp6-8000.app.github.dev/biomarkers?query=` + queryParam ;
+    const httpUrl = `${API_BASE_URL}/biomarkers?query=` + queryParam ;
     const fetchData = async () => {
       const response = await axios.get(httpUrl);
       const data : Biomarker[] =  response.data.map((item: any) => ({
@@ -80,7 +48,7 @@ const DiagnosticTool = () => {
 
   const analyzeBiomarkers = () => {
 
-    axios.post("https://super-duper-space-giggle-5j959q4j4pjc4gp6-8000.app.github.dev/biomarkers", biomarkers);
+    axios.post(`${API_BASE_URL}/biomarkers`, biomarkers);
 
     const abnormalMarkers = biomarkers.filter(
       marker => marker.value < marker.normal_range.min || marker.value > marker.normal_range.max

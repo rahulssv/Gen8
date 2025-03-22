@@ -2,9 +2,8 @@ import os
 import json
 import google.generativeai as genai
 from typing import List, Dict, Any
-from models import Summary
 
-def extract_summary_from_articles(articles: List[Dict[str, Any]], query: str) -> Dict[str, Any]:
+def extract_summary_from_articles(articles: List[Dict[str, Any]], query: str) -> str:
     """
     Extract a comprehensive summary from articles based on the query.
     
@@ -13,11 +12,11 @@ def extract_summary_from_articles(articles: List[Dict[str, Any]], query: str) ->
         query: The user's search query
         
     Returns:
-        A dictionary containing the summary information
+        A string containing the summary information
     """
     # Prepare the prompt for the AI model
     prompt = f"""
-    Generate a comprehensive summary about {query} based on the following scientific articles.
+    Generate a comprehensive summary of 75 words about {query} based on the following scientific articles.
     Focus on key findings, consensus views, and important contradictions or gaps in knowledge.
     
     ARTICLES:
@@ -30,22 +29,9 @@ def extract_summary_from_articles(articles: List[Dict[str, Any]], query: str) ->
         
         """
 
-    prompt += """
-    Please structure your summary with the following sections:
-    1. Overview: A brief introduction to the topic
-    2. Key Findings: The main discoveries or consensus from the literature
-    3. Clinical Implications: How these findings might affect clinical practice
-    4. Research Gaps: Areas where more research is needed
-    5. Conclusion: A brief summary of the current state of knowledge
-    
-    Return your response as a valid JSON object with the following structure:
-    {
-        "overview": "text...",
-        "keyFindings": "text...",
-        "clinicalImplications": "text...",
-        "researchGaps": "text...",
-        "conclusion": "text..."
-    }
+    prompt += """  
+    Return your response as a valid JSON data with the following structure:
+    {'summary': 'text..'}
     """
 
     try:
@@ -64,29 +50,17 @@ def extract_summary_from_articles(articles: List[Dict[str, Any]], query: str) ->
 
         summary_data = json.loads(response_text)
 
-        # Create a Summary object
-        summary = Summary(
-            overview=summary_data.get("overview", "No overview available"),
-            key_findings=summary_data.get("keyFindings", "No key findings available"),
-            clinical_implications=summary_data.get("clinicalImplications", "No clinical implications available"),
-            research_gaps=summary_data.get("researchGaps", "No research gaps available"),
-            conclusion=summary_data.get("conclusion", "No conclusion available")
-        )
+        # # Create a Summary object
+        # summary = Summary(
+        #     overview=summary_data.get("overview", "No overview available"),
+        #     key_findings=summary_data.get("keyFindings", "No key findings available"),
+        #     clinical_implications=summary_data.get("clinicalImplications", "No clinical implications available"),
+        #     research_gaps=summary_data.get("researchGaps", "No research gaps available"),
+        #     conclusion=summary_data.get("conclusion", "No conclusion available")
+        # )
 
-        return {
-            "overview": summary.overview,
-            "keyFindings": summary.key_findings,
-            "clinicalImplications": summary.clinical_implications,
-            "researchGaps": summary.research_gaps,
-            "conclusion": summary.conclusion
-        }
+        return summary_data.get("summary", "No summary available")
 
     except Exception as e:
         print(f"Error extracting summary: {str(e)}")
-        return {
-            "overview": "Error generating summary",
-            "keyFindings": "Error generating key findings",
-            "clinicalImplications": "Error generating clinical implications",
-            "researchGaps": "Error generating research gaps",
-            "conclusion": "Error generating conclusion"
-        }
+        return "Error generating summary"

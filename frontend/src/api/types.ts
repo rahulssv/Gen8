@@ -127,3 +127,23 @@ export interface Biomarker{
   },
   description: string
 }
+
+export interface DiagnosticResult {
+  summary: string;
+  risk_level: "low" | "moderate" | "high" | "very_high";
+  abnormal_markers: {
+    id: string;
+    name: string;
+    value: number;
+    unit: string;
+    deviation: "above" | "below";
+    deviation_percentage: number;
+  }[];
+  potential_conditions: {
+    name: string;
+    probability: number;
+    description: string;
+    recommendations: string[];
+  }[];
+  lifestyle_recommendations: string[];
+}
