@@ -30,7 +30,9 @@ export const searchArticles = async (query: string): Promise<QueryResult> => {
   await new Promise(resolve => setTimeout(resolve, 2000));
 
   try {
-    const [articlesRes, entitiesRes, statisticsRes, summaryRes, questionsRes] = await Promise.all([
+    
+    const [searchRes, articlesRes, entitiesRes, statisticsRes, summaryRes, questionsRes] = await Promise.all([
+      httpClient.request<"">('/search', { method: 'POST', body: { "query" : query } }),
       httpClient.request<Article[]>('/articles', { queryParams: { query } }).catch(() => articles),
       httpClient.request<any[]>('/entities', { queryParams: { query } }).catch(() => entities),
       httpClient.request<any[]>('/statistics', { queryParams: {} }).catch(() => statistics),
@@ -40,6 +42,7 @@ export const searchArticles = async (query: string): Promise<QueryResult> => {
 
     return {
       query,
+      searchRes,
       articles: articlesRes,
       entities: entitiesRes,
       statistics: statisticsRes,
