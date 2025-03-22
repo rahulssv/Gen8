@@ -19,6 +19,19 @@ from drug_extraction import extract_drugs_from_articles
 from disease_extraction import extract_diseases_from_articles
 from co_biomarker_extraction import extract_co_biomarkers_from_articles
 from process_pubmed_article import process_pubmed_article
+from process_biomarkers import process_biomarkers
+from typing import Optional, Dict , Any
+from openai import OpenAI
+
+model = os.getenv('MODEL')
+gateway_base_url=os.getenv('GATEWAY_BASE_URL')
+gateway_api_key=os.getenv('GATEWAY_API_KEY')
+
+client = OpenAI(
+    api_key=gateway_api_key,
+    base_url=gateway_base_url,
+)
+
 
 # Load environment variables
 load_dotenv()
@@ -68,11 +81,34 @@ def save_to_database(db: Session, articles, entities, relations, stats):
         db.query(StatisticalData).delete()
         
         # Add new data
-        db.bulk_save_objects(articles)
-        db.bulk_save_objects(entities)
-        db.bulk_save_objects(relations)
-        db.bulk_save_objects(stats)
-        
+        for article in articles:
+            existing_article = db.query(Article).filter_by(pmid=article.pmid).first()
+            if existing_article:
+                db.merge(article)  # Update existing article
+            else:
+                db.add(article)  # Add new article
+
+        for entity in entities:
+            existing_entity = db.query(Entity).filter_by(name=entity.name).first()
+            if existing_entity:
+                db.merge(entity)  # Update existing entity
+            else:
+                db.add(entity)  # Add new entity
+
+        for relation in relations:
+            existing_relation = db.query(Relation).filter_by(subject_id=relation.subject_id, object_id=relation.object_id, predicate=relation.predicate).first()
+            if existing_relation:
+                db.merge(relation)  # Update existing relation
+            else:
+                db.add(relation)  # Add new relation
+
+        for stat in stats:
+            existing_stat = db.query(StatisticalData).filter_by(type=stat.type, value=stat.value, context=stat.context).first()
+            if existing_stat:
+                db.merge(stat)  # Update existing statistical data
+            else:
+                db.add(stat)  # Add new statistical data
+
         db.commit()
         return True
     except Exception as e:
@@ -148,7 +184,7 @@ def process_statistics(paper_data):
         print(f"Error processing statistics: {str(e)}")
         return []
 
-def fetch_pubmed_pmids(query, max_results=100):
+def fetch_pubmed_pmids(query, max_results=200):
     print("[DEBUG] Fetching PMIDs...")
     base_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
     params = {
@@ -189,16 +225,42 @@ def fetch_pubmed_details(pmids):
         print(f"[ERROR] Fetching details: {e}")
     return details
 
+# def select_top_papers_with_gemini(details, query):
+#     print("[DEBUG] Selecting top papers...")
+#     prompt = f"Select the atleast 10 most relevant PubMed papers for: {query}\n\n"
+#     for pmid, info in details.items():
+#         prompt += f"PMID: {pmid}\nTitle: {info['title']}\nJournal: {info['journal']}\n\n"
+    
+#     model = genai.GenerativeModel('gemini-2.0-flash')
+#     response = model.generate_content(prompt)
+#     selected_pmids = re.findall(r'\d+', response.text)
+#     return [pmid for pmid in selected_pmids if pmid in details][:5]
+
 def select_top_papers_with_gemini(details, query):
     print("[DEBUG] Selecting top papers...")
-    prompt = f"Select the most relevant PubMed papers for: {query}\n\n"
+    prompt = f"Select the at least 10 most relevant PubMed papers for: {query}\n\n"
     for pmid, info in details.items():
         prompt += f"PMID: {pmid}\nTitle: {info['title']}\nJournal: {info['journal']}\n\n"
-    
-    model = genai.GenerativeModel('gemini-2.0-flash')
-    response = model.generate_content(prompt)
-    selected_pmids = re.findall(r'\d+', response.text)
-    return [pmid for pmid in selected_pmids if pmid in details][:5]
+
+    try:
+        response = client.chat.completions.create(
+            model=model,
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=4096
+        )
+
+        if response and hasattr(response, "model_dump"):
+            response_data = response.model_dump()
+            if "choices" in response_data and len(response_data["choices"]) > 0:
+                selected_pmids = re.findall(r'\d+', response_data["choices"][0]["message"]["content"])
+                return [pmid for pmid in selected_pmids if pmid in details][:5]
+
+        print("[ERROR] Empty or unexpected response from OpenAI API")
+        return []
+    except Exception as e:
+        print(f"[ERROR] Unexpected error: {str(e)}")
+        return []
+
 
 def fetch_pubmed_summaries(pmids):
     print("[DEBUG] Fetching summaries...")
@@ -216,16 +278,42 @@ def fetch_pubmed_summaries(pmids):
     
     return summaries
 
+# def deep_search_with_gemini(summaries, query):
+#     print("[DEBUG] Performing deep search...")
+#     prompt = f"Deep search: Select the most relevant PubMed papers for: {query}\n\n"
+#     for pmid, summary in summaries.items():
+#         prompt += f"PMID: {pmid}\nAbstract: {summary}\n\n"
+    
+#     model = genai.GenerativeModel('gemini-2.0-flash')
+#     response = model.generate_content(prompt)
+#     best_pmids = re.findall(r'\d+', response.text)
+#     return [pmid for pmid in best_pmids if pmid in summaries][:5]
+
+
 def deep_search_with_gemini(summaries, query):
     print("[DEBUG] Performing deep search...")
     prompt = f"Deep search: Select the most relevant PubMed papers for: {query}\n\n"
     for pmid, summary in summaries.items():
         prompt += f"PMID: {pmid}\nAbstract: {summary}\n\n"
-    
-    model = genai.GenerativeModel('gemini-2.0-flash')
-    response = model.generate_content(prompt)
-    best_pmids = re.findall(r'\d+', response.text)
-    return [pmid for pmid in best_pmids if pmid in summaries][:5]
+
+    try:
+        response = client.chat.completions.create(
+            model=model,
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=4096
+        )
+
+        if response and hasattr(response, "model_dump"):
+            response_data = response.model_dump()
+            if "choices" in response_data and len(response_data["choices"]) > 0:
+                best_pmids = re.findall(r'\d+', response_data["choices"][0]["message"]["content"])
+                return [pmid for pmid in best_pmids if pmid in summaries][:10]
+
+        print("[ERROR] Empty or unexpected response from OpenAI API")
+        return []
+    except Exception as e:
+        print(f"[ERROR] Unexpected error: {str(e)}")
+        return []
 
 def generate_best_articles_json(best_pmids, full_details):
     print("[DEBUG] Saving best articles...")
@@ -300,7 +388,7 @@ def generate_qna_from_articles(articles, query):
 def handle_search(search_query: SearchQuery, db: Session = Depends(get_db)):
     query = search_query.query
     
-    pmids = fetch_pubmed_pmids(query, max_results=100)
+    pmids = fetch_pubmed_pmids(query, max_results=200)
     basic_details = fetch_pubmed_details(pmids)
     selected_pmids = select_top_papers_with_gemini(basic_details, query)
     summaries = fetch_pubmed_summaries(selected_pmids)
@@ -435,6 +523,35 @@ def process_article(url: str):
     article_details = process_pubmed_article(url)
     return article_details.dict()
     
+
+class NormalRange(BaseModel):
+    min: float
+    max: float
+
+class BiomarkerInput(BaseModel):
+    name: str
+    value: int
+    unit: str
+    normal_range: NormalRange
+
+class BiomarkerAnalysisResponse(BaseModel):
+    summary: str
+    risk_level: str
+    abnormal_markers: List[Dict[str, Any]]
+    potential_conditions: List[Dict[str, Any]]
+    lifestyle_recommendations: List[str]
+
+@app.post("/biomarkers", response_model=BiomarkerAnalysisResponse)
+def analyze_biomarkers(biomarkers: List[BiomarkerInput]):
+    try:
+        biomarkers_dict = [biomarker.dict() for biomarker in biomarkers]
+        analysis_result = process_biomarkers(biomarkers_dict)
+        if not analysis_result:
+            raise HTTPException(status_code=500, detail="Failed to process biomarkers")
+        return analysis_result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 if __name__ == '__main__':
     import uvicorn
     uvicorn.run(app, port=8000, debug=True)

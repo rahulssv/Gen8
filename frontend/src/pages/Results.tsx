@@ -36,6 +36,7 @@ const Results = () => {
   const [coexistingData] = useState<CoexistingBiomarker[]>(coexistingDataJson);
 
   const query = new URLSearchParams(location.search).get('q') || '';
+  localStorage.setItem('query',query);
 
   const fetchResults = async (searchQuery: string) => {
     if (!searchQuery) {

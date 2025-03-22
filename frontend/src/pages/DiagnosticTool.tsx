@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { TestTube, Microscope, AlertCircle, LineChart, ArrowRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import biomarkersData from '../../../backend/json/Biomarker.json'
+import axios from 'axios';
 
 interface Biomarker {
   id: string;
@@ -43,16 +44,44 @@ interface DiagnosticResult {
 const DiagnosticTool = () => {
   const { toast } = useToast();
   const [diagnosisResult, setDiagnosisResult] = useState<string | null>(null);
-  const [biomarkers, setBiomarkers] = useState<Biomarker[]>(biomarkersData || []);
+  const [biomarkers, setBiomarkers] = useState<Biomarker[]>([]);
   const [diagnosticData, setDiagnosticData] = useState<DiagnosticResult | null>(null);
 
-  const handleBiomarkerChange = (id: string, newValue: number[]) => {
+  const handleBiomarkerChange = (id: string, newValue: number) => {
+    const updatedData = biomarkers.map((item) => item.id === id ? {...item,value: newValue} : item)
+    setBiomarkers(updatedData);
+
     setBiomarkers(prev => prev.map(marker => 
       marker.id === id ? { ...marker, value: newValue[0] } : marker
     ));
   };
+  https://super-duper-space-giggle-5j959q4j4pjc4gp6-8000.app.github.dev/
+  useEffect(()=>{
+    const queryParam = localStorage.getItem('query');
+    const httpUrl = `https://super-duper-space-giggle-5j959q4j4pjc4gp6-8000.app.github.dev/biomarkers?query=` + queryParam ;
+    const fetchData = async () => {
+      const response = await axios.get(httpUrl);
+      const data : Biomarker[] =  response.data.map((item: any) => ({
+        id: item?.id,
+        name: item?.name,
+        value: item?.value,
+        unit: item?.unit,
+        normal_range: {
+          min: item?.normal_range?.min,
+          max: item?.normal_range?.max
+        },
+        description: item?.description
+      })
+    )
+      setBiomarkers(data);
+    }
+    fetchData();
+  },[])
 
   const analyzeBiomarkers = () => {
+
+    axios.post("https://super-duper-space-giggle-5j959q4j4pjc4gp6-8000.app.github.dev/biomarkers", biomarkers);
+
     const abnormalMarkers = biomarkers.filter(
       marker => marker.value < marker.normal_range.min || marker.value > marker.normal_range.max
     );
