@@ -19,6 +19,8 @@ from drug_extraction import extract_drugs_from_articles
 from disease_extraction import extract_diseases_from_articles
 from co_biomarker_extraction import extract_co_biomarkers_from_articles
 from summary_extraction import extract_summary_from_articles
+from key_findings_extraction import extract_key_findings_from_articles
+from entity_extraction import extract_entity_from_articles
 
 # Load environment variables
 load_dotenv()
@@ -435,6 +437,50 @@ def get_summary(query: str, db: Session = Depends(get_db)):
     articles = get_articles_from_db(db)
     summary = extract_summary_from_articles(articles, query)
     return summary
+
+@app.get("/key_findings")
+def get_key_findings(query: str, db: Session = Depends(get_db)):
+    """
+    Get key statistical findings from articles related to a query.
+    
+    Args:
+        query (str): The search query
+        db (Session): Database session
+        
+    Returns:
+        list: List of key statistical findings
+    """
+    articles = get_articles_from_db(db)
+    if not articles:
+        raise HTTPException(status_code=404, detail="No articles found")
+    
+    key_findings = extract_key_findings_from_articles(articles, query)
+    return key_findings
+
+# from entity_extraction import extract_key_entities_from_articles
+
+@app.get("/key_entities")
+def get_key_entities(query: str, db: Session = Depends(get_db)):
+    """
+    Get key entities from articles related to a query.
+    
+    Args:
+        query (str): The search query
+        db (Session): Database session
+        
+    Returns:
+        list: List of key entities
+    """
+    articles = get_articles_from_db(db)
+    if not articles:
+        raise HTTPException(status_code=404, detail="No articles found")
+    
+    try:
+        key_entities = extract_entity_from_articles(articles, query)
+        return key_entities
+    except Exception as e:
+        print(f"Error extracting key entities: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error extracting key entities: {str(e)}")
 
 @app.get("/co-biomarkers")
 def get_co_biomarkers(query: str, db: Session = Depends(get_db)):
