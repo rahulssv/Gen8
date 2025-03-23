@@ -3,20 +3,20 @@ import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge'; // Import Badge
-import { analyzeSingleArticle } from '@/api/api'; // Remove analyzePdf since it's not used
-import { ExtractionResult } from '@/api/types';
-import { Loader2, Link } from 'lucide-react';
-import QASection from '@/components/QASection'; // Import QASection
+import { Loader2, Link, Upload, CheckCircle } from 'lucide-react';
+import axios from "axios";
 
 const ArticleAnalyzer = () => {
   const { toast } = useToast();
   const [articleUrl, setArticleUrl] = useState('');
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [result, setResult] = useState<ExtractionResult | null>(null);
+  const [result, setResult] = useState<any | null>(null);
+  const [isPdfAnalysis, setIsPdfAnalysis] = useState(false); // Track if the analysis is for PDF
 
+  // Handle URL analysis
   const handleUrlAnalyze = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -31,11 +31,14 @@ const ArticleAnalyzer = () => {
 
     setIsAnalyzing(true);
     setResult(null);
+    setIsPdfAnalysis(false); // Ensure this is set to false for URL analysis
 
     try {
-      const data = await analyzeSingleArticle(articleUrl);
-      console.log('Fetched data:', data); // Debugging: Log the fetched data
-      setResult(data);
+      // Call the correct API endpoint for URL analysis (GET request)
+      const response = await axios.get("https://congenial-space-journey-9qp4759gqjvcx96q-8000.app.github.dev/process-article", {
+        params: { url: articleUrl }, // Pass the URL as a query parameter
+      });
+      setResult(response.data);
       toast({
         title: "Analysis complete",
         description: "Article has been successfully analyzed",
@@ -52,7 +55,8 @@ const ArticleAnalyzer = () => {
     }
   };
 
-  const handlePdfUpload = (e: React.FormEvent) => {
+  // Handle PDF upload and analysis
+  const handlePdfUpload = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!pdfFile) {
@@ -64,11 +68,49 @@ const ArticleAnalyzer = () => {
       return;
     }
 
-    toast({
-      title: "PDF uploaded",
-      description: "PDF upload functionality is not implemented yet.",
-      variant: "default",
-    });
+    setIsAnalyzing(true);
+    setResult(null);
+    setIsPdfAnalysis(true); // Set this to true for PDF analysis
+
+    const formData = new FormData();
+    formData.append("pdf", pdfFile);
+
+    try {
+      const response = await axios.post("https://congenial-space-journey-9qp4759gqjvcx96q-8000.app.github.dev/article", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      if (response.data.error) {
+        toast({
+          title: "Analysis failed",
+          description: response.data.error,
+          variant: "destructive",
+        });
+      } else {
+        setResult(response.data);
+        toast({
+          title: "Analysis complete",
+          description: "PDF has been successfully analyzed",
+        });
+      }
+    } catch (err) {
+      console.error('PDF Analysis error:', err);
+      toast({
+        title: "Analysis failed",
+        description: "Failed to analyze the PDF. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setPdfFile(e.target.files[0]);
+    }
   };
 
   return (
@@ -83,115 +125,176 @@ const ArticleAnalyzer = () => {
           </p>
         </div>
 
-        {/* URL Input Form */}
-        <Card className="mb-10">
-          <CardHeader>
-            <CardTitle>Analyze Article</CardTitle>
-            <CardDescription>
-              Enter the URL of a research article or upload a PDF file
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleUrlAnalyze}>
-              <div className="grid w-full items-center gap-4">
-                <div className="flex flex-col space-y-1.5">
-                  <Label htmlFor="url">Article URL</Label>
-                  <div className="flex gap-2">
-                    <div className="relative flex-grow">
-                      <Link className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-                      <Input
-                        id="url"
-                        className="pl-10"
-                        value={articleUrl}
-                        onChange={(e) => setArticleUrl(e.target.value)}
-                      />
+        {/* Tabs for URL and PDF Analysis */}
+        <Tabs defaultValue="url" className="w-full">
+          <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 mb-8">
+            <TabsTrigger value="url">Analyze URL</TabsTrigger>
+            <TabsTrigger value="pdf">Upload PDF</TabsTrigger>
+          </TabsList>
+
+          {/* URL Analysis Tab */}
+          <TabsContent value="url">
+            <Card className="mb-10">
+              <CardHeader>
+                <CardTitle>Analyze Article URL</CardTitle>
+                <CardDescription>
+                  Enter the URL of a research article for analysis.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleUrlAnalyze}>
+                  <div className="grid w-full items-center gap-4">
+                    <div className="flex flex-col space-y-1.5">
+                      <Label htmlFor="url">Article URL</Label>
+                      <div className="flex gap-2">
+                        <div className="relative flex-grow">
+                          <Link className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                          <Input
+                            id="url"
+                            placeholder="https://example.com/article"
+                            className="pl-10"
+                            value={articleUrl}
+                            onChange={(e) => setArticleUrl(e.target.value)}
+                          />
+                        </div>
+                        <Button type="submit" disabled={isAnalyzing || !articleUrl}>
+                          {isAnalyzing ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              Analyzing...
+                            </>
+                          ) : (
+                            'Analyze'
+                          )}
+                        </Button>
+                      </div>
                     </div>
-                    <Button type="submit" disabled={isAnalyzing || !articleUrl}>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* PDF Upload Tab */}
+          <TabsContent value="pdf">
+            <Card className="mb-10">
+              <CardHeader>
+                <CardTitle>Upload PDF Article</CardTitle>
+                <CardDescription>
+                  Upload a research article in PDF format for analysis.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handlePdfUpload}>
+                  <div className="grid w-full items-center gap-4">
+                    <div className="flex flex-col space-y-1.5">
+                      <Label htmlFor="pdf">PDF File</Label>
+                      <div className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-6 text-center">
+                        {pdfFile ? (
+                          <div className="space-y-2">
+                            <CheckCircle className="h-8 w-8 text-green-500 mx-auto" />
+                            <p className="text-sm font-medium">{pdfFile.name}</p>
+                            <p className="text-xs text-gray-500">
+                              {(pdfFile.size / 1024 / 1024).toFixed(2)} MB
+                            </p>
+                            <Button 
+                              type="button" 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => setPdfFile(null)}
+                            >
+                              Change File
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="space-y-2">
+                            <Upload className="h-8 w-8 text-gray-400 mx-auto" />
+                            <p className="text-sm font-medium">Drag & drop or click to upload</p>
+                            <p className="text-xs text-gray-500">
+                              Supports PDF files up to 10MB
+                            </p>
+                            <Input
+                              id="pdf"
+                              type="file"
+                              accept=".pdf"
+                              className="hidden"
+                              onChange={handleFileChange}
+                            />
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={() => document.getElementById('pdf')?.click()}
+                            >
+                              Select File
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <Button 
+                      type="submit" 
+                      className="w-full"
+                      disabled={isAnalyzing || !pdfFile}
+                    >
                       {isAnalyzing ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                           Analyzing...
                         </>
                       ) : (
-                        'Analyze URL'
+                        'Analyze PDF'
                       )}
                     </Button>
                   </div>
-                </div>
-              </div>
-            </form>
-
-            <form onSubmit={handlePdfUpload} className="mt-6">
-              <div className="grid w-full items-center gap-4">
-                <div className="flex flex-col space-y-1.5">
-                  <Label htmlFor="pdf">Upload PDF</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      id="pdf"
-                      type="file"
-                      accept="application/pdf"
-                      onChange={(e) => setPdfFile(e.target.files?.[0] || null)}
-                    />
-                    <Button type="submit" disabled={!pdfFile}>
-                      Upload PDF
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
+                </form>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
 
         {/* Results Section */}
         {result && (
-          <div className="space-y-8 animate-fade-in">
-            {/* Title and Keywords */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                Article Details
-              </h2>
-              <p className="text-gray-700 dark:text-gray-300">
-                <strong>Title:</strong> {result.title || 'N/A'}
-              </p>
-              <div className="mt-4">
-                <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">
-                  Keywords
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {result.keywords?.map((keyword, index) => (
-                    <Badge
-                      key={index}
-                      className="bg-blue-100 text-blue-800 hover:bg-blue-200"
-                    >
-                      {keyword}
-                    </Badge>
-                  )) || (
-                    <p className="text-gray-700 dark:text-gray-300">No keywords available.</p>
-                  )}
-                </div>
-              </div>
-            </div>
-
+          <div className="space-y-8 animate-fade-in mt-10">
             {/* Summary */}
-            {result.summary ? (
+            {result.summary && (
               <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
                   Summary
                 </h2>
                 <p className="text-gray-700 dark:text-gray-300">{result.summary}</p>
               </div>
-            ) : (
+            )}
+
+            {/* Key Findings for PDF */}
+            {isPdfAnalysis && result.key_findings?.length > 0 && (
               <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                <p className="text-gray-700 dark:text-gray-300">No summary available.</p>
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                  Key Findings
+                </h2>
+                <ul className="list-disc list-inside text-gray-700 dark:text-gray-300">
+                  {result.key_findings.map((finding: any, index: number) => (
+                    <li key={index}>{finding.point}</li>
+                  ))}
+                </ul>
               </div>
             )}
 
-            {/* Common Questions */}
-            {result.aiGeneratedQuestions?.length > 0 ? (
-              <QASection questions={result.aiGeneratedQuestions} />
-            ) : (
+            {/* Keywords for URL */}
+            {!isPdfAnalysis && result.keywords?.length > 0 && (
               <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                <p className="text-gray-700 dark:text-gray-300">No questions available.</p>
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                  Keywords
+                </h2>
+                <div className="flex flex-wrap gap-2">
+                  {result.keywords.map((keyword, index) => (
+                    <span
+                      key={index}
+                      className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm"
+                    >
+                      {keyword}
+                    </span>
+                  ))}
+                </div>
               </div>
             )}
           </div>
