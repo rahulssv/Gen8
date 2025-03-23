@@ -26,6 +26,8 @@ from entity_extraction import extract_entity_from_articles
 
 from typing import Optional, Dict , Any
 from openai import OpenAI
+from fastapi import FastAPI, HTTPException, status, Depends, UploadFile, File
+import fitz
 
 model = os.getenv('MODEL')
 gateway_base_url=os.getenv('GATEWAY_BASE_URL')
@@ -188,7 +190,18 @@ def process_statistics(paper_data):
         print(f"Error processing statistics: {str(e)}")
         return []
 
-def fetch_pubmed_pmids(query, max_results=50):
+def fetch_pubmed_pmids(query: str, max_results: int = 200) -> list:
+    """
+    Fetch PMIDs from PubMed based on the query. If the number of PMIDs found is less than 5,
+    use an LLM to generate keywords, refine the query, and fetch additional PMIDs.
+
+    Args:
+        query (str): The search query.
+        max_results (int): Maximum number of results to fetch.
+
+    Returns:
+        list: A list of PMIDs (as strings).
+    """
     print("[DEBUG] Fetching PMIDs...")
     base_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
     params = {
@@ -197,12 +210,60 @@ def fetch_pubmed_pmids(query, max_results=50):
         "retmode": "json",
         "retmax": max_results
     }
+    pmid_list = []
+
     try:
+        # Initial PubMed search
         response = requests.get(base_url, params=params)
         response.raise_for_status()
         data = response.json()
         pmid_list = data.get("esearchresult", {}).get("idlist", [])
         print(f"[DEBUG] Total relevant PMIDs found: {len(pmid_list)}")
+
+        # If PMIDs are less than 5, use LLM to generate keywords and refine the query
+        if len(pmid_list) < 5:
+            print("[DEBUG] Using LLM to generate keywords and refine search...")
+            prompt = (
+                f"From the following query, extract relevant biomarker keywords: {query}\n"
+                "Return the keywords as a comma-separated list."
+            )
+            try:
+                # Assuming `client` is already initialized and `model` is defined
+                llm_response = client.chat.completions.create(
+                    model=model,
+                    messages=[{"role": "user", "content": prompt}],
+                    max_tokens=100
+                )
+                print(f"[DEBUG] LLM Response: {llm_response}")
+
+                if llm_response and hasattr(llm_response, "choices"):
+                    # Extract the content from the LLM response
+                    llm_content = llm_response.choices[0].message.content.strip()
+                    print(f"[DEBUG] Extracted Keywords: {llm_content}")
+
+                    # Use the generated keywords as a new query
+                    refined_query = llm_content
+                    params["term"] = f"{refined_query} AND hasabstract[text] AND (free full text[Filter] OR open access[Filter])"
+
+                    # Perform another PubMed search with the refined query
+                    response = requests.get(base_url, params=params)
+                    response.raise_for_status()
+                    data = response.json()
+                    additional_pmids = data.get("esearchresult", {}).get("idlist", [])
+                    pmid_list.extend(additional_pmids)
+                    print(f"[DEBUG] Total PMIDs found after refinement: {len(pmid_list)}")
+                else:
+                    print("[ERROR] LLM did not return valid keywords.")
+            except Exception as e:
+                print(f"[ERROR] LLM keyword generation failed: {e}")
+
+        # Ensure pmid_list is always a list
+        if not isinstance(pmid_list, list):
+            print("[ERROR] PMID list is not in the expected format. Converting to an empty list.")
+            pmid_list = []
+
+        # Convert each number to a string
+        pmid_list = [str(pmid) for pmid in pmid_list]
         return pmid_list
     except Exception as e:
         print(f"[ERROR] Fetching PMIDs: {e}")
@@ -604,7 +665,61 @@ def get_key_entities(query: str, db: Session = Depends(get_db)):
     except Exception as e:
         print(f"Error extracting key entities: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error extracting key entities: {str(e)}")
+def extract_text_from_pdf(pdf_file: UploadFile) -> str:
+    """Extracts text from an uploaded PDF file."""
+    doc = fitz.open(stream=pdf_file.file.read(), filetype="pdf")
+    text = "\n".join([page.get_text("text") for page in doc])
+    return text
 
+
+def generate_summary(text: str) -> Dict:
+    """Processes the extracted text with the LLM to generate a structured summary."""
+    prompt = (
+        "Analyze the given article and provide a well-structured summary including key findings. "
+        "Return only valid JSON in the following format:\n"
+        '{\"summary\": \"string\", \"key_findings\": [{\"point\": \"string\"}]}'
+        "\n\n"
+        f"Article Text:\n{text}"
+    )
+    
+    try:
+        response = client.chat.completions.create(
+            model=model,
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=4096
+        )
+
+        if response and hasattr(response, "model_dump"):
+            response_data = response.model_dump()
+            if "choices" in response_data and len(response_data["choices"]) > 0:
+                analysis_data = response_data["choices"][0]["message"]["content"].strip().strip("```json").strip("```")
+                
+                try:
+                    parsed_data = json.loads(analysis_data)
+                    return parsed_data
+                except json.JSONDecodeError as e:
+                    print(f"[ERROR] Invalid JSON from model: {str(e)}")
+                    return {"error": "Invalid response format"}
+    
+        return {"error": "Unexpected LLM response"}
+    except Exception as e:
+        print(f"[ERROR] Unexpected error: {str(e)}")
+        return {"error": "Internal server error"}
+
+
+@app.post("/article")
+async def process_article(pdf: UploadFile = File(...)):
+    """Handles the /article endpoint, processing the uploaded PDF and returning a structured summary."""
+    try:
+        text = extract_text_from_pdf(pdf)
+        if not text:
+            return {"error": "No text extracted from the PDF"}
+        summary = generate_summary(text)
+        return summary
+    except Exception as e:
+        print(f"[ERROR] {str(e)}")
+        return {"error": "Failed to process the PDF"}
+ 
 
 if __name__ == '__main__':
     import uvicorn

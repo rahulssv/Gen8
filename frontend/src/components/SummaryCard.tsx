@@ -7,9 +7,12 @@ import { Download, Loader2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { API_BASE_URL } from '@/api/config';
+
 interface SummaryCardProps {
   result: QueryResult;
 }
+
+const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours cache duration
 
 const SummaryCard = ({ result }: SummaryCardProps) => {
   const [showPdfExport, setShowPdfExport] = useState(false);
@@ -22,27 +25,68 @@ const SummaryCard = ({ result }: SummaryCardProps) => {
     entities: true
   });
 
-  // Check if data is available and update loading states
   useEffect(() => {
     const queryParam = localStorage.getItem('query');
-    if (result) {
-      // Create a new loading state object
-      const newLoadingStates = {
-        summary: !resultSet,
-        statistics: !keyFinindings || keyFinindings.length === 0,
-        entities: !keyEntities || keyEntities.length === 0
-      };
-      const fetchData = async () => {
-        const response = await axios.get(`${API_BASE_URL}/summary?query=` + queryParam);
-        const keyFResponse = await axios.get(`${API_BASE_URL}/key_findings?query=` + queryParam);
-        const keyEResponse = await axios.get(`${API_BASE_URL}/key_entities?query=` + queryParam);
-        setResultSet(response.data);
-        setKeyFindings(keyFResponse.data);
-        setKeyEntities(keyEResponse.data);
+    if (!result || !queryParam) return;
+
+    const fetchAndCacheData = async () => {
+      try {
+        setLoadingStates({
+          summary: true,
+          statistics: true,
+          entities: true
+        });
+
+        const [summaryRes, keyFRes, keyERes] = await Promise.all([
+          axios.get(`${API_BASE_URL}/summary?query=${queryParam}`),
+          axios.get(`${API_BASE_URL}/key_findings?query=${queryParam}`),
+          axios.get(`${API_BASE_URL}/key_entities?query=${queryParam}`)
+        ]);
+
+        const cacheData = {
+          summary: summaryRes.data,
+          keyFindings: keyFRes.data,
+          keyEntities: keyERes.data,
+          timestamp: Date.now()
+        };
+
+        localStorage.setItem(`queryData-${queryParam}`, JSON.stringify(cacheData));
+
+        setResultSet(cacheData.summary);
+        setKeyFindings(cacheData.keyFindings);
+        setKeyEntities(cacheData.keyEntities);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setLoadingStates({
+          summary: false,
+          statistics: false,
+          entities: false
+        });
       }
-      fetchData();
-      setLoadingStates(newLoadingStates);
+    };
+
+    const cacheKey = `queryData-${queryParam}`;
+    const cachedData = localStorage.getItem(cacheKey);
+
+    if (cachedData) {
+      const parsedData = JSON.parse(cachedData);
+      const isCacheValid = Date.now() - parsedData.timestamp < CACHE_DURATION;
+
+      if (isCacheValid) {
+        setResultSet(parsedData.summary);
+        setKeyFindings(parsedData.keyFindings);
+        setKeyEntities(parsedData.keyEntities);
+        setLoadingStates({
+          summary: false,
+          statistics: false,
+          entities: false
+        });
+        return;
+      }
     }
+
+    fetchAndCacheData();
   }, [result]);
 
   // Check if any section is still loading
