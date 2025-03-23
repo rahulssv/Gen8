@@ -190,7 +190,7 @@ def process_statistics(paper_data):
         print(f"Error processing statistics: {str(e)}")
         return []
 
-def fetch_pubmed_pmids(query: str, max_results: int = 200) -> list:
+def fetch_pubmed_pmids(query: str, max_results: int = 50) -> list:
     """
     Fetch PMIDs from PubMed based on the query. If the number of PMIDs found is less than 5,
     use an LLM to generate keywords, refine the query, and fetch additional PMIDs.
@@ -453,7 +453,7 @@ def generate_qna_from_articles(articles, query):
 def handle_search(search_query: SearchQuery, db: Session = Depends(get_db)):
     query = search_query.query
     
-    pmids = fetch_pubmed_pmids(query, max_results=200)
+    pmids = fetch_pubmed_pmids(query, max_results=50)
     basic_details = fetch_pubmed_details(pmids)
     selected_pmids = select_top_papers_with_gemini(basic_details, query)
     summaries = fetch_pubmed_summaries(selected_pmids)

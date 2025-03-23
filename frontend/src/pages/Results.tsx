@@ -35,7 +35,7 @@ const Results = () => {
   const [drugsData, setDrugsData] = useState<Drug[]>([]);
   // const [trialsData, setTrialsData] = useState<ClinicalTrial[]>([]);
   const [diseaseData, setDiseaseData] = useState<DiseaseAssociation[]>([]);
-  const [coexistingData, setCoexistingData] = useState<CoexistingBiomarker[]>([]);
+  // const [coexistingData, setCoexistingData] = useState<CoexistingBiomarker[]>([]);
 
   const query = new URLSearchParams(location.search).get('q') || '';
   localStorage.setItem('query', query);
@@ -89,16 +89,16 @@ const Results = () => {
       )
       setDiseaseData(diseasesData);
 
-      const coexistingDatasResponse = await axios.get(`${API_BASE_URL}/co-biomarkers?query=` + queryParam);
-      const coexistingDatas: CoexistingBiomarker[] = coexistingDatasResponse.data.map((item: any) => ({
-        name: item?.name,
-        type: item?.type,
-        effect: item?.effect,
-        clinicalImplication: item?.clinicalImplication,
-        frequencyOfCooccurrence: item?.frequencyOfCooccurrence
-      })
-      )
-      setCoexistingData(coexistingDatas);
+      // const coexistingDatasResponse = await axios.get(`${API_BASE_URL}/co-biomarkers?query=` + queryParam);
+      // const coexistingDatas: CoexistingBiomarker[] = coexistingDatasResponse.data.map((item: any) => ({
+      //   name: item?.name,
+      //   type: item?.type,
+      //   effect: item?.effect,
+      //   clinicalImplication: item?.clinicalImplication,
+      //   frequencyOfCooccurrence: item?.frequencyOfCooccurrence
+      // })
+      // )
+      // setCoexistingData(coexistingDatas);
     } catch (err) {
       console.error('Error fetching results:', err);
       setError('Failed to fetch results. Please try again.');
@@ -224,7 +224,7 @@ const Results = () => {
 
                   <TabsContent value="connections" className="space-y-6">
                     <DiseaseAssociationsCard associations={diseaseData} />
-                    <CoexistingBiomarkersCard biomarkers={coexistingData} />
+                    {/* <CoexistingBiomarkersCard biomarkers={coexistingData} /> */}
                     <VisualizationCard result={result} />
                   </TabsContent>
                 </Tabs>
